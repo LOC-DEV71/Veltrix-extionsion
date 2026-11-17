@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Veltrix Chặn Quảng Cáo",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Chặn quảng cáo, banner, popup và tab quảng cáo tự bật lên (danh sách EasyList + ABPVN cho web Việt). Bật / tắt theo từng trang.",
   "icons": {
     "128": "icon.png"
@@ -51,7 +51,8 @@
       ],
       "run_at": "document_start",
       "all_frames": true,
-      "world": "MAIN"
+      "world": "MAIN",
+      "match_about_blank": true
     },
     {
       "matches": [

@@ -126,21 +126,45 @@ const isAdHost = (host) => {
   for (let h = host; h.includes('.'); h = h.slice(h.indexOf('.') + 1)) if (adDomains.has(h)) return true;
   return false;
 };
-const popups = new Map(); // tabId mới mở → { at, sourceTabId }
+// Tên miền gốc (giống popup-guard.js) và các trang đăng nhập / thanh toán luôn được mở cửa sổ riêng.
+const SLD = new Set(['com', 'net', 'org', 'edu', 'gov', 'co', 'ac', 'info', 'biz', 'name', 'pro', 'int', 'health', 'ne', 'or', 'go']);
+const siteOf = (host) => {
+  const p = host.toLowerCase().split('.');
+  if (p.length <= 2) return p.join('.');
+  return p.slice(p[p.length - 1].length === 2 && SLD.has(p[p.length - 2]) ? -3 : -2).join('.');
+};
+const TRUSTED = new Set([
+  'google.com', 'youtube.com', 'facebook.com', 'messenger.com', 'instagram.com', 'apple.com', 'microsoft.com', 'microsoftonline.com',
+  'live.com', 'github.com', 'twitter.com', 'x.com', 'linkedin.com', 'discord.com', 'tiktok.com', 'zalo.me', 'zaloapp.com',
+  'paypal.com', 'stripe.com', 'momo.vn', 'vnpay.vn', 'zalopay.vn', 'shopeepay.vn', 'napas.com.vn',
+]);
+const isBlank = (url) => !url || url === 'about:blank';
+
+const popups = new Map(); // tabId mới mở → { at, sourceTabId, sourceSite, blank }
+async function closePopup(tabId, p, url) {
+  popups.delete(tabId);
+  chrome.tabs.remove(tabId).catch(() => {});
+  bump(p.sourceTabId);
+  chrome.tabs.sendMessage(p.sourceTabId, { type: 'popupBlocked', url }).catch(() => {}); // hiện thông báo "Vẫn mở" ở trang gốc
+}
 async function checkPopup(tabId, url) {
   const p = popups.get(tabId);
   if (!p || Date.now() - p.at > 10000) { popups.delete(tabId); return; }
   const host = hostOf(url);
-  if (!host || (await chrome.storage.local.get('off')).off) return;
-  const source = await chrome.tabs.get(p.sourceTabId).catch(() => null);
-  if (source?.url && (await isAllowed(hostOf(source.url)))) return;
+  if (!host || !/^https?:/.test(url) || (await chrome.storage.local.get('off')).off) return;
+  if (p.sourceSite && (await isAllowed(p.sourceSite))) return;
   await loadAdDomains();
-  if (isAdHost(host)) { popups.delete(tabId); chrome.tabs.remove(tabId).catch(() => {}); bump(p.sourceTabId); }
+  if (isAdHost(host)) return closePopup(tabId, p, url);
+  // Mánh "mở tab trống rồi mới đổi địa chỉ" (né popup-guard.js): tab mở ra là about:blank rồi chuyển sang trang KHÁC trang gốc.
+  const site = siteOf(host);
+  if (p.blank && p.sourceSite && site !== siteOf(p.sourceSite) && !TRUSTED.has(site)) return closePopup(tabId, p, url);
 }
-chrome.webNavigation.onCreatedNavigationTarget.addListener((d) => {
-  popups.set(d.tabId, { at: Date.now(), sourceTabId: d.sourceTabId });
+chrome.webNavigation.onCreatedNavigationTarget.addListener(async (d) => {
+  const source = await chrome.tabs.get(d.sourceTabId).catch(() => null);
+  popups.set(d.tabId, { at: Date.now(), sourceTabId: d.sourceTabId, sourceSite: hostOf(source?.url || ''), blank: isBlank(d.url) });
   checkPopup(d.tabId, d.url);
 });
+chrome.webNavigation.onBeforeNavigate.addListener((d) => { if (d.frameId === 0 && popups.has(d.tabId)) checkPopup(d.tabId, d.url); });
 chrome.webRequest.onBeforeRedirect.addListener((d) => { if (popups.has(d.tabId)) checkPopup(d.tabId, d.redirectUrl); }, { urls: ['<all_urls>'], types: ['main_frame'] });
 chrome.webNavigation.onCommitted.addListener((d) => { if (d.frameId === 0 && popups.has(d.tabId)) checkPopup(d.tabId, d.url); });
 chrome.tabs.onRemoved.addListener((tabId) => popups.delete(tabId));

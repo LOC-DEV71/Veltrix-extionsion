@@ -4,6 +4,12 @@ chrome.runtime.sendMessage({ type: 'hide', url: location.href }).then((r) => {
   // Bộ chặn tab bật lên (popup-guard.js) tắt theo: trang được phép quảng cáo hoặc đang tạm tắt chặn mọi trang.
   document.documentElement.dataset.veltrixPopupGuard = r?.ok ? 'on' : 'off';
   window.dispatchEvent(new Event('veltrix:popup-guard'));
+  // Background vừa đóng một tab quảng cáo bật lên từ trang này: nhờ popup-guard.js hiện thông báo "Vẫn mở".
+  if (window.top === window) {
+    chrome.runtime.onMessage.addListener((msg) => {
+      if (msg?.type === 'popupBlocked') window.postMessage({ veltrixPopupBlocked: String(msg.url) }, '*');
+    });
+  }
   if (!r?.css) return;
   const style = document.createElement('style');
   style.id = 'veltrix-adblock';

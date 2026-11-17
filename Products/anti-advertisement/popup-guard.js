@@ -93,18 +93,66 @@
     window.addEventListener('message', (e) => { if (e.data && typeof e.data.veltrixPopupBlocked === 'string') notify(e.data.veltrixPopupBlocked); });
   }
 
-  // ---- 1. window.open ----
-  const guardedOpen = function (url, ...rest) {
-    if (enabled && url != null && isForeign(String(url))) {
-      const clickedLink = performance.now() - lastClick.t < 1500 && lastClick.href && targetSite(lastClick.href) === targetSite(String(url));
-      if (!clickedLink) { notify(String(new URL(String(url), location.href))); return null; }
-    }
-    return realOpen.call(this, url, ...rest);
-  };
-  try {
-    Object.defineProperty(guardedOpen, 'toString', { value: () => realOpen.toString() });
-    Object.defineProperty(window, 'open', { value: guardedOpen, writable: true, configurable: true });
-  } catch { window.open = guardedOpen; }
+  // Mạng popunder (vd pd.warkedmalie.com trên yanhh3d.blog, đọc mã 2026-11-18) né lớp bọc bằng 4 mánh, bịt cả 4:
+  //  a. Function.prototype.toString.call(window.open) để xem có còn "[native code]" → giả toString cho mọi hàm bọc.
+  //  b. Tạo iframe about:blank rồi gọi iframe.contentWindow.open "sạch" → bọc luôn window.open của iframe cùng nguồn.
+  //  c. window.open('about:blank') rồi mới đổi địa chỉ tab đó → background.js đóng tab nếu nó chuyển sang trang khác.
+  //  d. <form target="_blank"> + form.submit() → bọc HTMLFormElement.submit / requestSubmit.
+  const disguised = new WeakMap(); // hàm bọc → hàm gốc (để toString trả về mã gốc)
+  const nativeToString = Function.prototype.toString;
+  const fakeToString = function () { return nativeToString.call(disguised.get(this) ?? this); };
+  disguised.set(fakeToString, nativeToString);
+  try { Object.defineProperty(Function.prototype, 'toString', { value: fakeToString, writable: true, configurable: true }); } catch { /* bỏ qua */ }
+
+  const userClickedLinkTo = (url) => performance.now() - lastClick.t < 1500 && lastClick.href && targetSite(lastClick.href) === targetSite(url);
+
+  // ---- 1. window.open (của trang và của mọi iframe cùng nguồn) ----
+  function guardWindow(w) {
+    try {
+      if (!w || w.__veltrixGuarded) return;
+      const orig = w.open;
+      const guarded = function (url, ...rest) {
+        if (enabled && url != null && isForeign(String(url)) && !userClickedLinkTo(String(url))) {
+          notify(String(new URL(String(url), location.href)));
+          return null;
+        }
+        return orig.call(this, url, ...rest);
+      };
+      disguised.set(guarded, orig);
+      Object.defineProperty(w, 'open', { value: guarded, writable: true, configurable: true });
+      Object.defineProperty(w, '__veltrixGuarded', { value: true });
+    } catch { /* iframe khác nguồn: không đụng được, cũng không lấy được open của nó */ }
+  }
+  guardWindow(window); // realOpen (dùng cho nút "Vẫn mở") đã lấy bản gốc ở phần thông báo phía trên
+
+  // iframe.contentWindow / contentDocument: bọc window.open của iframe trước khi trả về cho script.
+  for (const prop of ['contentWindow', 'contentDocument']) {
+    const d = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, prop);
+    if (!d?.get) continue;
+    const get = function () {
+      const v = d.get.call(this);
+      guardWindow(prop === 'contentWindow' ? v : v?.defaultView);
+      return v;
+    };
+    disguised.set(get, d.get);
+    Object.defineProperty(HTMLIFrameElement.prototype, prop, { ...d, get });
+  }
+
+  // ---- 1b. form.submit() mở tab mới sang trang khác ----
+  const opensNewTab = (t) => Boolean(t) && !['_self', '_top', '_parent'].includes(t.toLowerCase());
+  for (const name of ['submit', 'requestSubmit']) {
+    const orig = HTMLFormElement.prototype[name];
+    if (typeof orig !== 'function') continue;
+    const guarded = function (...a) {
+      if (enabled && opensNewTab(this.target) && isForeign(this.action) && !userClickedLinkTo(this.action)) {
+        notify(this.action);
+        return undefined;
+      }
+      return orig.apply(this, a);
+    };
+    disguised.set(guarded, orig);
+    Object.defineProperty(HTMLFormElement.prototype, name, { value: guarded, writable: true, configurable: true });
+  }
 
   // ---- 2 + 3. Link target=_blank: bấm giả, hoặc bẫy bấm trong suốt ----
   const coversScreen = (el) => {
