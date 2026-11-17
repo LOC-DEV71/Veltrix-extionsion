@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const fontScaleVal = document.getElementById('font-scale-val');
   const glassToggle = document.getElementById('glass-toggle');
   const hoverToggle = document.getElementById('hover-toggle');
+  const blurRange = document.getElementById('blur-range');
+  const blurVal = document.getElementById('blur-val');
   const bgState = document.getElementById('bg-state');
   const bgFileInput = document.getElementById('bg-file');
   const bgClearBtn = document.getElementById('bg-clear');
@@ -58,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.font ||
       (state.radius !== null && state.radius !== undefined && state.radius !== '') ||
       typeof state.glass === 'boolean' ||
+      (state.blur !== null && state.blur !== undefined && state.blur !== '') ||
       state.background ||
       state.density ||
       (state.fontScale !== null && state.fontScale !== undefined && state.fontScale !== '') ||
@@ -101,6 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     glassToggle.checked = Boolean(resolved.glass);
     hoverToggle.checked = Boolean(resolved.hover);
+    blurRange.value = String(resolved.blur);
+    blurVal.textContent = `${resolved.blur}px`;
 
     if (state.background?.startsWith('data:')) bgState.textContent = 'Ảnh tuỳ chọn';
     else if (state.background === 'none') bgState.textContent = 'Đã tắt';
@@ -153,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
   fontScaleInput.addEventListener('input', (e) => save({ fontScale: parseFloat(e.target.value) }));
   glassToggle.addEventListener('change', (e) => save({ glass: e.target.checked }));
   hoverToggle.addEventListener('change', (e) => save({ hover: e.target.checked }));
+  blurRange.addEventListener('input', (e) => save({ blur: Number(e.target.value) }));
 
   bgFileInput.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
@@ -175,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
       font: '',
       radius: null,
       glass: null,
+      blur: null,
       background: '',
       density: '',
       fontScale: null,

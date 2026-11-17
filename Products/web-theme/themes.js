@@ -6,56 +6,56 @@
     {
       id: 'veltrix', name: 'Veltrix Tím', dark: true,
       bg: '#120f24', surface: '#1b1733', surface2: '#272050', text: '#ece9ff', muted: '#a8a2cc', border: '#2d2752', accent: '#a78bfa',
-      font: 'Be Vietnam Pro', radius: 16, glass: true,
+      font: 'Be Vietnam Pro', radius: 16, glass: true, blur: 16,
       background: 'radial-gradient(circle at 18% 12%, rgba(167,139,250,0.18), transparent 45%), radial-gradient(circle at 82% 85%, rgba(124,58,237,0.14), transparent 50%)',
       density: 'normal', fontScale: 1, hover: true
     },
     {
       id: 'night', name: 'Đêm Xanh', dark: true,
       bg: '#0b1220', surface: '#111a2e', surface2: '#1a2640', text: '#e6edf7', muted: '#94a3b8', border: '#22304a', accent: '#22d3ee',
-      font: 'Inter', radius: 8, glass: true,
+      font: 'Inter', radius: 8, glass: true, blur: 16,
       background: 'radial-gradient(circle at 80% 10%, rgba(34,211,238,0.14), transparent 45%)',
       density: 'normal', fontScale: 1, hover: true
     },
     {
       id: 'forest', name: 'Rừng Thông', dark: true,
       bg: '#0e1613', surface: '#15211c', surface2: '#1e2e27', text: '#e3efe8', muted: '#9bb3a6', border: '#253a31', accent: '#4ade80',
-      font: 'Be Vietnam Pro', radius: 8, glass: false,
+      font: 'Be Vietnam Pro', radius: 8, glass: false, blur: 0,
       background: 'none',
       density: 'comfy', fontScale: 1, hover: true
     },
     {
       id: 'sunset', name: 'Hoàng Hôn', dark: true,
       bg: '#1a1210', surface: '#241815', surface2: '#31211b', text: '#f7e9e3', muted: '#c9a99d', border: '#3b2a23', accent: '#fb923c',
-      font: 'Nunito', radius: 16, glass: true,
+      font: 'Nunito', radius: 16, glass: true, blur: 16,
       background: 'radial-gradient(circle at 50% 0%, rgba(251,146,60,0.16), transparent 55%)',
       density: 'comfy', fontScale: 1.05, hover: true
     },
     {
       id: 'oled', name: 'Đen OLED', dark: true,
       bg: '#000000', surface: '#0b0b0b', surface2: '#171717', text: '#f5f5f5', muted: '#a3a3a3', border: '#262626', accent: '#e5e5e5',
-      font: 'Inter', radius: 0, glass: false,
+      font: 'Inter', radius: 0, glass: false, blur: 0,
       background: 'none',
       density: 'compact', fontScale: 0.95, hover: false
     },
     {
       id: 'sakura', name: 'Sakura', dark: false,
       bg: '#fff6f9', surface: '#ffffff', surface2: '#fde7ef', text: '#2b1720', muted: '#8a6474', border: '#f3d2df', accent: '#db2777',
-      font: 'Nunito', radius: 16, glass: true,
+      font: 'Nunito', radius: 16, glass: true, blur: 16,
       background: 'radial-gradient(circle at 15% 15%, rgba(219,39,119,0.10), transparent 50%), radial-gradient(circle at 85% 80%, rgba(244,114,182,0.12), transparent 50%)',
       density: 'comfy', fontScale: 1, hover: true
     },
     {
       id: 'mint', name: 'Bạc Hà', dark: false,
       bg: '#f2faf7', surface: '#ffffff', surface2: '#e0f4ec', text: '#10241d', muted: '#557367', border: '#cde8dd', accent: '#0d9488',
-      font: 'Be Vietnam Pro', radius: 8, glass: false,
+      font: 'Be Vietnam Pro', radius: 8, glass: false, blur: 0,
       background: 'none',
       density: 'normal', fontScale: 1, hover: true
     },
     {
       id: 'paper', name: 'Giấy Ngà', dark: false,
       bg: '#faf6ee', surface: '#fffdf8', surface2: '#f1eadb', text: '#2a241a', muted: '#7a6f5c', border: '#e6dcc6', accent: '#b45309',
-      font: 'system', radius: 8, glass: false,
+      font: 'system', radius: 8, glass: false, blur: 0,
       background: 'none',
       density: 'comfy', fontScale: 1.05, hover: false
     }
@@ -69,6 +69,7 @@
     font: '',
     radius: null,
     glass: null,
+    blur: null,
     background: '',
     density: '',
     fontScale: null,
@@ -110,8 +111,10 @@
     const fontScale = s.fontScale !== null && s.fontScale !== undefined && s.fontScale !== '' ? Number(s.fontScale) : base.fontScale;
     const hover = typeof s.hover === 'boolean' ? s.hover : base.hover;
     const hasBgImage = Boolean(background && background.startsWith('data:'));
+    const hasCustomBlur = s.blur !== null && s.blur !== undefined && s.blur !== '';
+    const blur = hasCustomBlur ? Number(s.blur) : (hasBgImage ? Math.max(16, base.blur) : (glass ? base.blur : 0));
     const surfacePanel = hasBgImage ? rgba(base.surface, 0.85) : base.surface;
-    return { ...base, accent, ink: inkOn(accent), font, radius, glass, background, density, fontScale, hover, hasBgImage, surfacePanel };
+    return { ...base, accent, ink: inkOn(accent), font, radius, glass, blur, background, density, fontScale, hover, hasBgImage, surfacePanel };
   }
 
   function fontUrl(file) {
@@ -180,9 +183,14 @@
       '--t1405e70a39276293': t.accent, '--t6216186c28b3834b': t.ink, '--t2d807bb79e75606d': t.accent, '--t617db776af0de196': t.accent,
     });
 
-    const headerBg = t.glass ? rgba(t.bg, 0.72) : (t.hasBgImage ? panel : t.bg);
-    const glassRule = t.glass
-      ? `#frosted-glass.with-chipbar.ytd-app,#frosted-glass.loading-with-chipbar.ytd-app,ytd-masthead #background.ytd-masthead,ytd-masthead.shell,ytd-masthead.shell.dark,ytd-multi-page-menu-renderer,ytd-menu-popup-renderer,tp-yt-paper-dialog,.ytSearchboxComponentSuggestionsContainer{background:${rgba(t.bg, 0.72)}!important;background-color:${rgba(t.bg, 0.72)}!important;backdrop-filter:blur(16px) saturate(140%)!important;-webkit-backdrop-filter:blur(16px) saturate(140%)!important}`
+    const blurPx = t.blur > 0 ? t.blur : 0;
+    const blurDecl = blurPx > 0
+      ? `backdrop-filter:blur(${blurPx}px) saturate(140%)!important;-webkit-backdrop-filter:blur(${blurPx}px) saturate(140%)!important`
+      : `backdrop-filter:none!important;-webkit-backdrop-filter:none!important`;
+
+    const headerBg = (t.glass || t.hasBgImage) ? rgba(t.bg, 0.72) : t.bg;
+    const glassRule = (t.glass || t.hasBgImage)
+      ? `#frosted-glass.with-chipbar.ytd-app,#frosted-glass.loading-with-chipbar.ytd-app,ytd-masthead #background.ytd-masthead,ytd-masthead.shell,ytd-masthead.shell.dark,ytd-multi-page-menu-renderer,ytd-menu-popup-renderer,tp-yt-paper-dialog,.ytSearchboxComponentSuggestionsContainer{background:${headerBg}!important;background-color:${headerBg}!important;${blurDecl}}`
       : `#frosted-glass.with-chipbar.ytd-app,#frosted-glass.loading-with-chipbar.ytd-app,ytd-masthead #background.ytd-masthead,ytd-masthead.shell,ytd-masthead.shell.dark{background:${headerBg}!important;background-color:${headerBg}!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}`;
 
     const densityRule = t.density === 'compact'
@@ -196,7 +204,8 @@
       : '';
 
     const bgImgCardRule = t.hasBgImage
-      ? `ytd-app,ytd-page-manager,#page-manager{background:transparent!important}ytd-rich-item-renderer #content,ytd-watch-metadata,ytd-comments,ytd-guide-renderer,#guide-content.ytd-app,ytd-mini-guide-renderer{background-color:${panel}!important;border-radius:${t.radius}px!important}`
+      ? `ytd-app,ytd-page-manager,#page-manager,#content.ytd-app,ytd-browse,ytd-watch-flexy,#columns,#primary,#secondary{background:transparent!important;background-color:transparent!important}
+ytd-rich-item-renderer #content,ytd-watch-metadata,ytd-comments,ytd-guide-renderer,#guide-content.ytd-app,tp-yt-app-drawer#guide #contentContainer.tp-yt-app-drawer,ytd-mini-guide-renderer,.ytSearchboxComponentInputBox,ytd-searchbox #container.ytd-searchbox,.ytChipShapeInactive,ytd-playlist-panel-renderer,#secondary-inner ytd-compact-video-renderer{background-color:${panel}!important;border-radius:${t.radius}px!important;${blurDecl}}`
       : `ytd-guide-renderer,#guide-content.ytd-app,tp-yt-app-drawer#guide #contentContainer.tp-yt-app-drawer,ytd-mini-guide-renderer{background-color:${t.bg}!important;color:${t.text}!important}`;
 
     return `${fontFacesCss(t.font)}
@@ -242,8 +251,15 @@ ${hoverRule}
       '--primary-deemphasized-button-background': rgba(t.accent, 0.15), '--primary-deemphasized-button-text': t.accent,
       '--toggle-active-background': t.accent, '--toggle-active-icon': t.ink, '--progress-ring-blue-foreground': t.accent,
     });
-    const glassRule = t.glass
-      ? `[role="banner"],[role="menu"],[role="dialog"]{background-color:${rgba(t.bg, 0.72)}!important;backdrop-filter:blur(16px) saturate(140%)!important;-webkit-backdrop-filter:blur(16px) saturate(140%)!important}`
+    const blurPx = t.blur > 0 ? t.blur : 0;
+    const blurDecl = blurPx > 0
+      ? `backdrop-filter:blur(${blurPx}px) saturate(140%)!important;-webkit-backdrop-filter:blur(${blurPx}px) saturate(140%)!important`
+      : `backdrop-filter:none!important;-webkit-backdrop-filter:none!important`;
+    const glassRule = (t.glass || t.hasBgImage)
+      ? `[role="banner"],[role="menu"],[role="dialog"]{background-color:${rgba(t.bg, 0.72)}!important;${blurDecl}}`
+      : '';
+    const bgImgCardRule = t.hasBgImage
+      ? `[role="main"],[role="feed"]{background:transparent!important}[role="article"],[data-pagelet*="FeedUnit"]>div,[role="navigation"],[role="complementary"],input[type="search"],[role="combobox"]{background-color:${panel}!important;${blurDecl}}`
       : '';
     const densityRule = t.density === 'compact'
       ? `[data-pagelet^="FeedUnit"]{margin-bottom:8px!important}`
@@ -260,6 +276,7 @@ body{background-color:${t.bg}!important;color:${t.text}!important;font-family:${
 body,input,textarea,button,select,span,div,p,a{font-family:${ff}!important}
 ${backgroundCss(t)}
 ${glassRule}
+${bgImgCardRule}
 [role="article"],[data-pagelet*="FeedUnit"]>div,input[type="search"],[role="combobox"],[role="dialog"],[role="menu"]{border-radius:${t.radius}px!important}
 ${densityRule}
 ${hoverRule}
@@ -269,8 +286,12 @@ ${hoverRule}
   function google(t) {
     const ff = fontStack(t.font);
     const panel = t.surfacePanel;
-    const glassRule = t.glass
-      ? `#searchform.minidiv,.sfbg{background-color:${rgba(t.bg, 0.72)}!important;backdrop-filter:blur(16px) saturate(140%)!important;-webkit-backdrop-filter:blur(16px) saturate(140%)!important}`
+    const blurPx = t.blur > 0 ? t.blur : 0;
+    const blurDecl = blurPx > 0
+      ? `backdrop-filter:blur(${blurPx}px) saturate(140%)!important;-webkit-backdrop-filter:blur(${blurPx}px) saturate(140%)!important`
+      : `backdrop-filter:none!important;-webkit-backdrop-filter:none!important`;
+    const glassRule = (t.glass || t.hasBgImage)
+      ? `#searchform.minidiv,.sfbg{background-color:${rgba(t.bg, 0.72)}!important;${blurDecl}}`
       : '';
     const densityRule = t.density === 'compact'
       ? `.MjjYud,.g{margin-bottom:14px!important}`
@@ -294,7 +315,7 @@ textarea.gLFyf,input.gLFyf{color:${t.text}!important}
 cite,.tjvcx,.qLRx3b{color:${rgba(t.text, 0.75)}!important}
 .gb_A svg,.gb_E{fill:${t.muted}!important}
 .c93Gbe,.FPdoLc input[type=submit],.gNO89b{background:${t.hasBgImage ? panel : t.surface2}!important;color:${t.text}!important;border-color:${t.border}!important;border-radius:${t.radius}px!important}
-${t.hasBgImage ? `.MjjYud,.g{background:${panel}!important;padding:12px 14px!important;border-radius:${t.radius}px!important}` : `.MjjYud,.g{border-radius:${t.radius}px!important}`}
+${t.hasBgImage ? `.RNNXgb,.MjjYud,.g,.c93Gbe,.FPdoLc input[type=submit],.gNO89b{${blurDecl}}.MjjYud,.g{background:${panel}!important;padding:12px 14px!important;border-radius:${t.radius}px!important}` : `.MjjYud,.g{border-radius:${t.radius}px!important}`}
 ${densityRule}
 ${hoverRule}
 ::selection{background:${rgba(t.accent, 0.35)}}`;
