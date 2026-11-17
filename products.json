@@ -32,17 +32,19 @@
       "icon": "icon.png",
       "zip": "veltrix-chan-quang-cao",
       "name": "Veltrix Chặn Quảng Cáo",
-      "short": "Chặn quảng cáo, banner, popup trên web. Có danh sách lọc riêng cho web Việt.",
+      "short": "Chặn quảng cáo, banner, popup và tab quảng cáo tự bật lên. Có danh sách lọc riêng cho web Việt.",
       "category": "privacy",
       "featured": true,
       "heroTitle": "Lướt web sạch quảng cáo",
-      "heroText": "Chặn banner, popup và trình theo dõi quảng cáo. Danh sách EasyList và ABPVN cho web Việt.",
+      "heroText": "Chặn banner, popup và tab quảng cáo tự bật lên khi xem phim. Danh sách EasyList và ABPVN cho web Việt.",
       "description": [
         "Veltrix Chặn Quảng Cáo chặn quảng cáo ngay từ lúc trang tải, nên trang nhẹ hơn và gọn hơn. Tiện ích dùng hai danh sách lọc công khai: EasyList cho web quốc tế và ABPVN cho web Việt.",
-        "Khung quảng cáo nào lọt qua sẽ được ẩn bằng CSS. Trang nào bị lỗi khi chặn, bạn có thể tắt chặn riêng cho trang đó chỉ với một cú bấm."
+        "Khung quảng cáo nào lọt qua sẽ được ẩn bằng CSS. Trang nào bị lỗi khi chặn, bạn có thể tắt chặn riêng cho trang đó chỉ với một cú bấm.",
+        "Web phim, truyện hay gắn script “bấm đâu cũng mở tab quảng cáo”. Veltrix chặn các tab tự bật lên này theo hành vi, kể cả khi mạng quảng cáo đổi tên miền liên tục, và hiện thông báo nhỏ kèm nút “Vẫn mở” phòng khi bạn cần."
       ],
       "features": [
         "Chặn quảng cáo, banner, popup bằng EasyList + ABPVN",
+        "Chặn tab quảng cáo tự bật lên khi bấm vào trang (popunder)",
         "Ẩn khung quảng cáo còn sót trên trang",
         "Tắt chặn riêng từng trang, hoặc tạm tắt mọi trang",
         "Số trên biểu tượng cho biết đã chặn bao nhiêu quảng cáo"
@@ -52,12 +54,15 @@
         "Một số luật lọc nâng cao (regex, $redirect, :has-text…) Chrome không hỗ trợ nên được bỏ qua."
       ],
       "tags": [
-        "quảng cáo",
+        "abpvn",
         "adblock",
         "chặn",
-        "popup",
         "easylist",
-        "abpvn"
+        "popunder",
+        "popup",
+        "quảng cáo",
+        "tab bật lên",
+        "web phim"
       ],
       "art": "adblock",
       "cover": "/thumbs/chan-quang-cao.webp"

@@ -1,6 +1,6 @@
 # Veltrix Chặn Quảng Cáo (extension Chrome / Edge)
 
-Chặn quảng cáo, banner, popup trên web. Thương hiệu: **Veltrix Store** (https://extension.veltrixhost.cloud). Dùng danh sách lọc công khai **EasyList** (quốc tế) + **ABPVN** (web Việt).
+Chặn quảng cáo, banner, popup và tab quảng cáo tự bật lên trên web. Thương hiệu: **Veltrix Store** (https://extension.veltrixhost.cloud). Dùng danh sách lọc công khai **EasyList** (quốc tế) + **ABPVN** (web Việt).
 
 ## Cài
 1. Mở `chrome://extensions` (Edge: `edge://extensions`), bật **Chế độ nhà phát triển**.
@@ -15,6 +15,10 @@ Chặn quảng cáo, banner, popup trên web. Thương hiệu: **Veltrix Store**
   Bộ chính ≤ 29.000 luật (Chrome bảo đảm chạy), bộ thêm dùng phần sức chứa dư chung của trình duyệt.
   Thứ tự ưu tiên: luật cho phép → tên miền quảng cáo lớn (`CORE_AD_DOMAINS`) → chặn hẳn tên miền quảng cáo → ABPVN → luật theo đường dẫn → luật riêng từng trang.
 - **Ẩn khung quảng cáo còn sót** (`cosmetic.json`): content script lấy CSS theo tên miền từ background và tự gắn vào trang ngay khi trang bắt đầu tải.
+- **Chặn tab bật lên** (`popup-guard.js`, chạy trong trang): mạng popunder đổi tên miền liên tục nên chặn theo hành vi —
+  `window.open` sang trang khác mà người dùng không bấm đúng link tới trang đó, script tự bấm hộ link `target=_blank`, lớp link
+  trong suốt phủ kín trang. Mỗi lần chặn hiện thông báo có nút "Vẫn mở". Đăng nhập / thanh toán phổ biến (Google, Facebook,
+  PayPal, MoMo…) luôn được mở. Lưới an toàn ở background: tab vừa bật lên trỏ tới tên miền quảng cáo đã biết thì đóng.
 - **Tắt theo trang**: luật động `allowAllRequests` cho tên miền đó + không gắn CSS ẩn.
 
 ## Cập nhật danh sách lọc

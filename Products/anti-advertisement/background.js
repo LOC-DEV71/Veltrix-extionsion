@@ -106,6 +106,45 @@ if (chrome.declarativeNetRequest.onRuleMatchedDebug) {
 }
 chrome.tabs.onRemoved.addListener((tabId) => { counts.delete(tabId); persistCounts(); });
 
+// ---- Lưới an toàn cho tab bật lên: tab vừa được trang khác mở ra (không phải người dùng tự mở) mà trỏ tới / chuyển hướng qua
+// tên miền quảng cáo đã biết (luật "||tenmien^" trong bộ luật) thì đóng. Phần chính chặn theo hành vi nằm ở popup-guard.js.
+let adDomains = null;
+async function loadAdDomains() {
+  if (adDomains) return adDomains;
+  const set = new Set();
+  for (const file of ['rules/ads.json', 'rules/ads_more.json']) {
+    try {
+      for (const r of await (await fetch(chrome.runtime.getURL(file))).json()) {
+        const m = r.action.type === 'block' && !r.condition.initiatorDomains && r.condition.urlFilter.match(/^\|\|([a-z0-9.-]+)\^?$/);
+        if (m) set.add(m[1]);
+      }
+    } catch { /* thiếu file: bỏ qua */ }
+  }
+  return (adDomains = set);
+}
+const isAdHost = (host) => {
+  for (let h = host; h.includes('.'); h = h.slice(h.indexOf('.') + 1)) if (adDomains.has(h)) return true;
+  return false;
+};
+const popups = new Map(); // tabId mới mở → { at, sourceTabId }
+async function checkPopup(tabId, url) {
+  const p = popups.get(tabId);
+  if (!p || Date.now() - p.at > 10000) { popups.delete(tabId); return; }
+  const host = hostOf(url);
+  if (!host || (await chrome.storage.local.get('off')).off) return;
+  const source = await chrome.tabs.get(p.sourceTabId).catch(() => null);
+  if (source?.url && (await isAllowed(hostOf(source.url)))) return;
+  await loadAdDomains();
+  if (isAdHost(host)) { popups.delete(tabId); chrome.tabs.remove(tabId).catch(() => {}); bump(p.sourceTabId); }
+}
+chrome.webNavigation.onCreatedNavigationTarget.addListener((d) => {
+  popups.set(d.tabId, { at: Date.now(), sourceTabId: d.sourceTabId });
+  checkPopup(d.tabId, d.url);
+});
+chrome.webRequest.onBeforeRedirect.addListener((d) => { if (popups.has(d.tabId)) checkPopup(d.tabId, d.redirectUrl); }, { urls: ['<all_urls>'], types: ['main_frame'] });
+chrome.webNavigation.onCommitted.addListener((d) => { if (d.frameId === 0 && popups.has(d.tabId)) checkPopup(d.tabId, d.url); });
+chrome.tabs.onRemoved.addListener((tabId) => popups.delete(tabId));
+
 chrome.runtime.onInstalled.addListener(async () => {
   await syncAllowRules();
   chrome.declarativeNetRequest.setExtensionActionOptions({ displayActionCountAsBadgeText: true });

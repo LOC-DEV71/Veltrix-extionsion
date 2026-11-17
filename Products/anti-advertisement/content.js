@@ -1,6 +1,9 @@
 // Chạy sớm nhất có thể trên mỗi trang / khung: lấy CSS ẩn khung quảng cáo từ background rồi tự gắn vào trang (trước khi quảng
 // cáo kịp hiện). Gắn vào <html> (lúc document_start chưa có <head>); trang đổi nội dung thì vẫn còn vì nằm ngoài <head>/<body>.
 chrome.runtime.sendMessage({ type: 'hide', url: location.href }).then((r) => {
+  // Bộ chặn tab bật lên (popup-guard.js) tắt theo: trang được phép quảng cáo hoặc đang tạm tắt chặn mọi trang.
+  document.documentElement.dataset.veltrixPopupGuard = r?.ok ? 'on' : 'off';
+  window.dispatchEvent(new Event('veltrix:popup-guard'));
   if (!r?.css) return;
   const style = document.createElement('style');
   style.id = 'veltrix-adblock';
