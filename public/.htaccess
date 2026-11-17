@@ -1,0 +1,5 @@
+# Hosting Apache: mở thẳng link /tien-ich/... vẫn vào được web React
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]

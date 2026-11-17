@@ -1,0 +1,3 @@
+{
+  "rewrites": [{ "source": "/((?!downloads/|icons/|assets/).*)", "destination": "/index.html" }]
+}

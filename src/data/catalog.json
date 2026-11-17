@@ -1,0 +1,124 @@
+{
+  "categories": [
+    {
+      "id": "privacy",
+      "name": "Chặn quảng cáo",
+      "icon": "shield",
+      "tone": "violet"
+    },
+    {
+      "id": "video",
+      "name": "Video & giải trí",
+      "icon": "play",
+      "tone": "pink"
+    },
+    {
+      "id": "tools",
+      "name": "Công cụ",
+      "icon": "tool",
+      "tone": "cyan"
+    },
+    {
+      "id": "look",
+      "name": "Giao diện web",
+      "icon": "brush",
+      "tone": "green"
+    }
+  ],
+  "products": [
+    {
+      "id": "chan-quang-cao",
+      "zip": "veltrix-chan-quang-cao",
+      "name": "Veltrix Chặn Quảng Cáo",
+      "short": "Chặn quảng cáo, banner, popup trên web. Có danh sách lọc riêng cho web Việt.",
+      "category": "privacy",
+      "featured": true,
+      "heroTitle": "Lướt web sạch quảng cáo",
+      "heroText": "Chặn banner, popup và trình theo dõi quảng cáo. Danh sách EasyList và ABPVN cho web Việt.",
+      "description": [
+        "Veltrix Chặn Quảng Cáo chặn quảng cáo ngay từ lúc trang tải, nên trang nhẹ hơn và gọn hơn. Tiện ích dùng hai danh sách lọc công khai: EasyList cho web quốc tế và ABPVN cho web Việt.",
+        "Khung quảng cáo nào lọt qua sẽ được ẩn bằng CSS. Trang nào bị lỗi khi chặn, bạn có thể tắt chặn riêng cho trang đó chỉ với một cú bấm."
+      ],
+      "features": [
+        "Chặn quảng cáo, banner, popup bằng EasyList + ABPVN",
+        "Ẩn khung quảng cáo còn sót trên trang",
+        "Tắt chặn riêng từng trang, hoặc tạm tắt mọi trang",
+        "Số trên biểu tượng cho biết đã chặn bao nhiêu quảng cáo"
+      ],
+      "notes": [
+        "Không chặn được quảng cáo chèn thẳng vào video YouTube.",
+        "Một số luật lọc nâng cao (regex, $redirect, :has-text…) Chrome không hỗ trợ nên được bỏ qua."
+      ],
+      "tags": [
+        "quảng cáo",
+        "adblock",
+        "chặn",
+        "popup",
+        "easylist",
+        "abpvn"
+      ],
+      "art": "adblock",
+      "cover": "/thumbs/chan-quang-cao.webp",
+      "icon": "/icons/chan-quang-cao.png",
+      "version": "1.2.1",
+      "zipUrl": "/downloads/veltrix-chan-quang-cao.zip",
+      "zipFolder": "veltrix-chan-quang-cao",
+      "size": 1008516,
+      "updated": "2026-11-17",
+      "permissions": [
+        "Đọc và thay đổi dữ liệu trên mọi trang web",
+        "Chặn hoặc cho phép yêu cầu mạng theo danh sách lọc",
+        "Đếm số yêu cầu mạng đã bị chặn",
+        "Lưu cài đặt của tiện ích trên máy bạn",
+        "Chèn mã và CSS vào trang web",
+        "Biết địa chỉ trang đang mở trong từng tab",
+        "Theo dõi yêu cầu mạng của trang"
+      ]
+    },
+    {
+      "id": "ambient-light",
+      "zip": "veltrix-ambient-light",
+      "name": "Veltrix Ambient Light",
+      "short": "Đèn nền Ambient Light cho YouTube: khung hình video tỏa ra khắp màn hình.",
+      "category": "video",
+      "featured": true,
+      "heroTitle": "Xem YouTube như ở rạp",
+      "heroText": "Khung hình video tỏa ra thành nền mờ quanh trình phát, kèm chọn chất lượng và làm nét video.",
+      "description": [
+        "Veltrix Ambient Light lấy chính khung hình đang phát, phóng to và làm mờ để trải ra phía sau trang YouTube. Màu nền đổi theo từng cảnh, giống đèn hắt sau TV.",
+        "Nút Veltrix ở góc dưới bên phải trang cho bạn bật / tắt hiệu ứng và chọn chất lượng video. Bảng điều khiển của tiện ích có thanh chỉnh độ sáng, độ mờ, kích thước và độ rực màu."
+      ],
+      "features": [
+        "Nền Ambient Light theo khung hình video thời gian thực",
+        "Chọn chất lượng video từ 144p đến 8K, kèm làm nét",
+        "Chỉnh độ sáng, độ mờ, kích thước, độ rực màu, FPS",
+        "Menu và thanh tìm kiếm YouTube dạng kính mờ"
+      ],
+      "notes": [
+        "Chỉ hoạt động trên youtube.com.",
+        "Chất lượng video không vượt quá mức cao nhất mà video đó có."
+      ],
+      "tags": [
+        "youtube",
+        "ambient",
+        "đèn nền",
+        "video",
+        "chất lượng",
+        "8k"
+      ],
+      "art": "ambient",
+      "cover": "/thumbs/ambient-light.webp",
+      "icon": "/icons/ambient-light.png",
+      "version": "1.0.0",
+      "zipUrl": "/downloads/veltrix-ambient-light.zip",
+      "zipFolder": "veltrix-ambient-light",
+      "size": 47275,
+      "updated": "2026-11-17",
+      "permissions": [
+        "Đọc và thay đổi dữ liệu trên youtube.com",
+        "Lưu cài đặt của tiện ích trên máy bạn",
+        "Truy cập tab hiện tại khi bạn bấm vào tiện ích"
+      ]
+    }
+  ]
+}
