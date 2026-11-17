@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<style>
+  /* Giao diện tiết chế kiểu tiện ích thật: nền trung tính theo sáng / tối của máy, đường kẻ mảnh, một màu nhấn. */
+  :root {
+    --bg: #ffffff; --fg: #1c1c1e; --muted: #6e6e73; --line: #e5e5ea; --hover: #f5f5f7;
+    --accent: #0a84ff; --track: #d1d1d6; --warn: #b25000;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1c1c1e; --fg: #f2f2f7; --muted: #98989f; --line: #38383a; --hover: #2c2c2e; --track: #48484a; --warn: #ff9f0a; }
+  }
+  * { box-sizing: border-box; }
+  body { width: 300px; margin: 0; background: var(--bg); color: var(--fg); font: 13px/1.4 -apple-system, "Segoe UI", system-ui, sans-serif; }
+  header { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-bottom: 1px solid var(--line); }
+  header img { width: 18px; height: 18px; }
+  header b { flex: 1; font-size: 13px; font-weight: 600; }
+
+  .switch { position: relative; width: 34px; height: 20px; flex-shrink: 0; }
+  .switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .switch span { position: absolute; inset: 0; border-radius: 10px; background: var(--track); transition: background .15s; cursor: pointer; }
+  .switch span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s; }
+  .switch input:checked + span { background: var(--accent); }
+  .switch input:checked + span::after { transform: translateX(14px); }
+  .switch input:disabled + span { opacity: .4; cursor: default; }
+
+  .site { display: flex; align-items: center; gap: 8px; padding: 14px 14px 0; color: var(--muted); }
+  .site img { width: 14px; height: 14px; }
+  .site span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .count { padding: 6px 14px 14px; }
+  .count strong { display: block; font-size: 34px; font-weight: 600; letter-spacing: -.5px; line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .count span { color: var(--muted); }
+  .count .state { color: var(--warn); }
+
+  dl { display: grid; grid-template-columns: 1fr 1fr; margin: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  dl div { padding: 10px 14px; }
+  dl div + div { border-left: 1px solid var(--line); }
+  dt { color: var(--muted); font-size: 12px; }
+  dd { margin: 2px 0 0; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .row div { flex: 1; min-width: 0; }
+  .row b { display: block; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row small { color: var(--muted); font-size: 12px; }
+
+  .empty { padding: 28px 14px; color: var(--muted); text-align: center; border-bottom: 1px solid var(--line); }
+  footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 14px; color: var(--muted); font-size: 11px; }
+  footer a { color: var(--accent); text-decoration: none; font-weight: 500; white-space: nowrap; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <img src="icon.png" alt="">
+  <b>Chặn quảng cáo</b>
+  <label class="switch" title="Bật / tắt chặn quảng cáo trên mọi trang"><input type="checkbox" id="all"><span></span></label>
+</header>
+<main id="main">
+  <div class="site"><img id="favicon" alt=""><span id="host">—</span></div>
+  <div class="count"><strong id="count">0</strong><span id="countLabel">quảng cáo đã chặn trên trang này</span></div>
+  <dl>
+    <div><dt>Tổng trên trang</dt><dd id="total">0</dd></div>
+    <div><dt>Số lần mở</dt><dd id="visits">0</dd></div>
+  </dl>
+  <div class="row">
+    <div><b id="siteLabel">Chặn trên trang này</b><small id="siteHint">Tắt nếu trang hiển thị sai</small></div>
+    <label class="switch"><input type="checkbox" id="site"><span></span></label>
+  </div>
+</main>
+<div class="empty" id="empty" hidden>Không chặn được trên trang này.</div>
+<footer><span id="foot">EasyList · ABPVN</span><a id="store" href="https://extension.veltrixhost.cloud" target="_blank" rel="noopener" title="extension.veltrixhost.cloud">Veltrix Store</a></footer>
+<script src="popup.js"></script>
+</body>
+</html>

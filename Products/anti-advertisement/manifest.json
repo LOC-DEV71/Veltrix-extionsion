@@ -1,0 +1,57 @@
+{
+  "manifest_version": 3,
+  "name": "Veltrix Chặn Quảng Cáo",
+  "version": "1.2.1",
+  "description": "Chặn quảng cáo, banner, popup trên web (danh sách EasyList + ABPVN cho web Việt). Bật / tắt theo từng trang.",
+  "icons": {
+    "128": "icon.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Chặn quảng cáo",
+    "default_icon": "icon.png"
+  },
+  "permissions": [
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
+    "storage",
+    "scripting",
+    "tabs",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ads",
+        "enabled": true,
+        "path": "rules/ads.json"
+      },
+      {
+        "id": "ads_more",
+        "enabled": true,
+        "path": "rules/ads_more.json"
+      }
+    ]
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "homepage_url": "https://extension.veltrixhost.cloud",
+  "author": "Veltrix Store"
+}

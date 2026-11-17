@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "zips": "node ../scripts/build.mjs",
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "npm run zips && vite",
+    "build": "npm run zips && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

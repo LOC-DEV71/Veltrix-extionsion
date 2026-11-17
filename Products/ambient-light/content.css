@@ -1,0 +1,652 @@
+/* Veltrix - True Real-Time Duplicated Video Background Styles */
+:root {
+  --veltrix-blur: 32px;
+  --veltrix-brightness: 100%;
+  --veltrix-saturate: 110%;
+  --veltrix-spread: 1.55;
+  --veltrix-opacity: 0.88;
+}
+
+/* ========================================================
+   VIEWPORT LOCK & NO HORIZONTAL SCROLLBAR (YOUTUBE ONLY)
+   ======================================================== */
+html[data-veltrix-yt="true"] {
+  background-color: #0f0f0f !important;
+  overflow-x: clip !important;
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+}
+
+html[data-veltrix-yt="true"] body,
+ytd-app {
+  background: transparent !important;
+  background-color: transparent !important;
+  overflow-x: clip !important;
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+}
+
+#content.ytd-app {
+  position: relative !important;
+  z-index: 0 !important;
+  isolation: isolate !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+ytd-page-manager#page-manager {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* ========================================================
+   YOUTUBE WATCH PAGE TRANSPARENCY & ISOLATION
+   Allow the full-screen duplicated video background to be
+   clearly visible behind all surrounding UI areas
+   ======================================================== */
+ytd-watch-flexy {
+  position: relative !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+ytd-watch-flexy #full-bleed-container,
+ytd-watch-flexy #player-full-bleed-container,
+ytd-watch-flexy #columns,
+ytd-watch-flexy #primary,
+ytd-watch-flexy #primary-inner,
+ytd-watch-flexy #secondary,
+ytd-watch-flexy #secondary-inner,
+ytd-watch-flexy #below,
+ytd-watch-flexy ytd-watch-metadata,
+ytd-watch-flexy #above-the-fold,
+ytd-watch-flexy #description,
+ytd-watch-flexy #description-inner,
+ytd-watch-flexy ytd-comments,
+ytd-watch-flexy ytd-item-section-renderer,
+ytd-watch-flexy ytd-watch-next-secondary-results-renderer,
+ytd-watch-flexy yt-chip-cloud-renderer,
+ytd-watch-flexy #chips-wrapper,
+ytd-watch-flexy #chips-content {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Completely disable YouTube's native color-gradient ambient mode */
+#cinematics,
+#cinematics-container,
+ytd-cinematics {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* ========================================================
+   LAYER 1 (BACKGROUND): FULL-SCREEN DUPLICATED VIDEO FRAME
+   Covers the entire viewport (100vw x 100vh) behind the player
+   ======================================================== */
+#veltrix-cinematics {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  z-index: -1 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.veltrix-ambient-canvas {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  object-fit: cover !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  display: block !important;
+  /* Anchor origin near the player center so the central subject (faces, characters, flowers)
+     expands outward into the top bar, bottom area, and right sidebar */
+  transform-origin: var(--veltrix-origin, 22% 42%) !important;
+  transform: scale(var(--veltrix-spread, 1.55)) !important;
+  filter: blur(var(--veltrix-blur, 32px)) brightness(var(--veltrix-brightness, 100%)) saturate(var(--veltrix-saturate, 110%)) !important;
+  opacity: var(--veltrix-opacity, 0.88) !important;
+  will-change: transform, filter, opacity;
+  box-sizing: border-box !important;
+}
+
+.veltrix-ambient-canvas.veltrix-hidden {
+  opacity: 0 !important;
+}
+
+/* ========================================================
+   LAYER 2 (FOREGROUND): SHARP ORIGINAL VIDEO & TRANSLUCENT UI
+   ======================================================== */
+#movie_player {
+  border-radius: 12px !important;
+  box-shadow: 0 12px 42px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* Transparent top header & frosted-glass bar so the upper duplicated frame shines through */
+#frosted-glass,
+#frosted-glass.ytd-app,
+#masthead-container,
+#masthead-container.ytd-app,
+ytd-masthead,
+ytd-masthead #background,
+ytd-masthead #container {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-bottom: none !important;
+}
+
+#masthead-container.ytd-app::after,
+ytd-masthead::before,
+ytd-masthead::after {
+  display: none !important;
+  background: transparent !important;
+}
+
+/* ========================================================
+   GLASS SEARCH BAR (ambient light shines through)
+   ======================================================== */
+ytd-searchbox,
+yt-searchbox {
+  background: transparent !important;
+}
+
+ytd-searchbox #container.ytd-searchbox,
+ytd-searchbox #search-form,
+yt-searchbox .ytSearchboxComponentInputBox,
+.ytSearchboxComponentInputBox {
+  background: rgba(10, 10, 14, 0.28) !important;
+  background-color: rgba(10, 10, 14, 0.28) !important;
+  backdrop-filter: blur(14px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  transition: background 0.25s ease, border-color 0.25s ease !important;
+}
+
+ytd-searchbox[has-focus] #container.ytd-searchbox,
+yt-searchbox .ytSearchboxComponentInputBoxHasFocus,
+.ytSearchboxComponentInputBox:focus-within {
+  background: rgba(10, 10, 14, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+ytd-searchbox input,
+yt-searchbox input,
+.ytSearchboxComponentInput {
+  background: transparent !important;
+  color: #fff !important;
+}
+
+ytd-searchbox input::placeholder,
+.ytSearchboxComponentInput::placeholder {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+#search-icon-legacy,
+ytd-searchbox #search-icon-legacy.ytd-searchbox,
+.ytSearchboxComponentSearchButton,
+#voice-search-button .yt-spec-button-shape-next,
+#voice-search-button button {
+  background: rgba(255, 255, 255, 0.12) !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+}
+
+#search-icon-legacy:hover,
+.ytSearchboxComponentSearchButton:hover,
+#voice-search-button button:hover {
+  background: rgba(255, 255, 255, 0.24) !important;
+}
+
+/* Translucent playlist panel */
+ytd-playlist-panel-renderer,
+#playlist {
+  background: rgba(15, 18, 26, 0.42) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 14px !important;
+}
+
+/* ========================================================
+   GENERIC WEBSITES (TikTok, Facebook, Twitch, HTML5...)
+   ======================================================== */
+.veltrix-ambient-wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  z-index: -1 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* ========================================================
+   EXPANDABLE VELTRIX LOGO DOCK (BOTTOM-RIGHT)
+   ======================================================== */
+#veltrix-quick-dock {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  z-index: 2147483646 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  user-select: none !important;
+}
+
+/* Main Logo Trigger Button */
+#veltrix-logo-trigger {
+  position: relative !important;
+  width: 44px !important;
+  height: 44px !important;
+  padding: 0 !important;
+  border-radius: 14px !important;
+  background: rgba(15, 17, 26, 0.78) !important;
+  backdrop-filter: blur(16px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+  border: 1px solid rgba(168, 85, 247, 0.55) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 16px rgba(168, 85, 247, 0.32) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+}
+
+#veltrix-logo-trigger:hover {
+  transform: scale(1.08) translateY(-2px) !important;
+  border-color: #c084fc !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65), 0 0 22px rgba(168, 85, 247, 0.55) !important;
+}
+
+#veltrix-logo-trigger:active {
+  transform: scale(0.94) !important;
+}
+
+#veltrix-quick-dock[data-open="true"] #veltrix-logo-trigger {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.45) !important;
+  transform: rotate(-8deg) scale(1.04) !important;
+}
+
+.veltrix-logo-img {
+  width: 28px !important;
+  height: 28px !important;
+  object-fit: contain !important;
+  pointer-events: none !important;
+  filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.45)) !important;
+}
+
+.veltrix-logo-fallback {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, #c084fc, #38bdf8) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Status indicator dot on corner of the logo button */
+.veltrix-logo-badge {
+  position: absolute !important;
+  top: -3px !important;
+  right: -3px !important;
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: #10b981 !important;
+  border: 2px solid #0f111a !important;
+  box-shadow: 0 0 8px #10b981 !important;
+  transition: background 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+#veltrix-quick-dock[data-enabled="false"] .veltrix-logo-badge {
+  background: #64748b !important;
+  box-shadow: none !important;
+}
+
+/* Expandable Menu Container ("Hiệu ứng bung ra") */
+.veltrix-dock-menu {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 5px 7px !important;
+  border-radius: 16px !important;
+  background: rgba(14, 16, 24, 0.68) !important;
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  transform-origin: right center !important;
+  transform: translateX(18px) scale(0.65) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition:
+    transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.22s ease,
+    visibility 0.22s ease !important;
+}
+
+#veltrix-quick-dock[data-open="true"] .veltrix-dock-menu {
+  transform: translateX(0) scale(1) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* Individual Action Pill Buttons inside the expanded menu */
+.veltrix-dock-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 11px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #cbd5e1 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.veltrix-dock-action:hover {
+  transform: translateY(-1px) scale(1.03) !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
+}
+
+.veltrix-dock-action:active {
+  transform: scale(0.96) !important;
+}
+
+.veltrix-dock-action[data-active="true"] {
+  background: rgba(168, 85, 247, 0.22) !important;
+  border-color: rgba(168, 85, 247, 0.55) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.25) !important;
+}
+
+#veltrix-btn-quality[data-active="true"] {
+  background: rgba(245, 158, 11, 0.2) !important;
+  border-color: rgba(251, 191, 36, 0.6) !important;
+  color: #fef3c7 !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.28) !important;
+}
+
+/* Quality & Audio Popover Wrapper & Upward Menu */
+.veltrix-quality-wrap {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.veltrix-quality-popover {
+  position: absolute !important;
+  bottom: calc(100% + 12px) !important;
+  right: 0 !important;
+  width: 185px !important;
+  padding: 6px !important;
+  border-radius: 14px !important;
+  background: rgba(14, 16, 24, 0.85) !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  transform-origin: bottom right !important;
+  transform: translateY(10px) scale(0.85) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition:
+    transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.18s ease,
+    visibility 0.18s ease !important;
+}
+
+#veltrix-quick-dock[data-open="true"][data-quality-open="true"] #veltrix-video-quality-popover {
+  transform: translateY(0) scale(1) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.veltrix-quality-header {
+  padding: 5px 8px 6px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+  color: #94a3b8 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  margin-bottom: 2px !important;
+}
+
+.veltrix-quality-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  padding: 6px 10px !important;
+  border-radius: 9px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: #e2e8f0 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+}
+
+.veltrix-quality-item:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.veltrix-quality-item[data-selected="true"] {
+  background: rgba(168, 85, 247, 0.25) !important;
+  border-color: rgba(168, 85, 247, 0.55) !important;
+  color: #ffffff !important;
+}
+
+.veltrix-q-badge {
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  padding: 1px 5px !important;
+  border-radius: 5px !important;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(56, 189, 248, 0.35)) !important;
+  border: 1px solid rgba(192, 132, 252, 0.45) !important;
+  color: #f8fafc !important;
+  letter-spacing: 0.4px !important;
+}
+
+/* ========================================================
+   MAIN VIDEO CLARITY & SHARPNESS ENHANCEMENT (1080p -> 8K)
+   Applies hardware-accelerated SVG Unsharp Mask + micro-contrast
+   directly to YouTube's main <video> element.
+   ======================================================== */
+html[data-veltrix-yt="true"][data-veltrix-quality="1080p"] #movie_player video.html5-main-video {
+  filter: url(#veltrix-sharpen-1080p) contrast(1.02) saturate(1.03) !important;
+}
+
+html[data-veltrix-yt="true"][data-veltrix-quality="2K"] #movie_player video.html5-main-video {
+  filter: url(#veltrix-sharpen-2k) contrast(1.03) saturate(1.05) !important;
+}
+
+html[data-veltrix-yt="true"][data-veltrix-quality="4K"] #movie_player video.html5-main-video {
+  filter: url(#veltrix-sharpen-4k) contrast(1.04) saturate(1.06) !important;
+}
+
+html[data-veltrix-yt="true"][data-veltrix-quality="8K"] #movie_player video.html5-main-video {
+  filter: url(#veltrix-sharpen-8k) contrast(1.05) saturate(1.08) !important;
+}
+
+.veltrix-dock-action .veltrix-qt-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: #64748b !important;
+  transition: background 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.veltrix-dock-action[data-active="true"] .veltrix-qt-dot {
+  background: #10b981 !important;
+  box-shadow: 0 0 8px #10b981 !important;
+}
+
+.veltrix-action-icon {
+  width: 14px !important;
+  height: 14px !important;
+  stroke: currentColor !important;
+  flex-shrink: 0 !important;
+}
+
+/* Hide quick dock when video is in fullscreen mode */
+:fullscreen #veltrix-quick-dock,
+:-webkit-full-screen #veltrix-quick-dock,
+html:has(.ytp-fullscreen) #veltrix-quick-dock {
+  display: none !important;
+}
+
+/* Ensure video stream and controls inside #movie_player fill the player box seamlessly in both Normal & 3D Cinema modes */
+html[data-veltrix-yt="true"] ytd-watch-flexy:not([fullscreen]) #movie_player {
+  overflow: hidden !important;
+}
+
+html[data-veltrix-yt="true"] ytd-watch-flexy:not([fullscreen]) #movie_player .html5-video-container,
+html[data-veltrix-yt="true"] ytd-watch-flexy:not([fullscreen]) #movie_player video.html5-main-video {
+  width: 100% !important;
+  height: 100% !important;
+  left: 0 !important;
+  top: 0 !important;
+  object-fit: contain !important;
+}
+
+/* ========================================================
+   FROSTED GLASS BLUR FOR ALL YOUTUBE MODALS, MENUS & DRAWER
+   (Account Menu, Notifications, Left Guide Drawer, Popups, Dialogs)
+   ======================================================== */
+
+/* 1. Outer Modal, Dropdown & Sheet Containers -> Frosted Glass Blur */
+html[data-veltrix-yt="true"] ytd-multi-page-menu-renderer,
+html[data-veltrix-yt="true"] ytd-menu-popup-renderer,
+html[data-veltrix-yt="true"] tp-yt-paper-dialog,
+html[data-veltrix-yt="true"] yt-sheet-view-model,
+html[data-veltrix-yt="true"] .ytSheetViewModelHost,
+html[data-veltrix-yt="true"] .ytContextualSheetLayoutHost,
+html[data-veltrix-yt="true"] .ytSearchboxComponentSuggestionsContainer,
+html[data-veltrix-yt="true"] .sbdd_b {
+  background: rgba(14, 16, 24, 0.52) !important;
+  background-color: rgba(14, 16, 24, 0.52) !important;
+  backdrop-filter: blur(24px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* 2. Left Sidebar Navigation Drawer (#guide) -> Frosted Glass Blur */
+html[data-veltrix-yt="true"] tp-yt-app-drawer#guide #contentContainer.tp-yt-app-drawer,
+html[data-veltrix-yt="true"] ytd-mini-guide-renderer {
+  background: rgba(14, 16, 24, 0.52) !important;
+  background-color: rgba(14, 16, 24, 0.52) !important;
+  backdrop-filter: blur(24px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 12px 0 36px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 3. Transparent Inner Headers, Sections & Wrappers inside Modals/Drawers
+      so they don't cover up the parent container's glass blur */
+html[data-veltrix-yt="true"] tp-yt-iron-dropdown #contentWrapper,
+html[data-veltrix-yt="true"] #container.ytd-multi-page-menu-renderer,
+html[data-veltrix-yt="true"] #header.ytd-multi-page-menu-renderer,
+html[data-veltrix-yt="true"] #sections.ytd-multi-page-menu-renderer,
+html[data-veltrix-yt="true"] #submenu.ytd-multi-page-menu-renderer,
+html[data-veltrix-yt="true"] ytd-active-account-header-renderer,
+html[data-veltrix-yt="true"] ytd-simple-menu-header-renderer,
+html[data-veltrix-yt="true"] yt-multi-page-menu-section-renderer,
+html[data-veltrix-yt="true"] #items.yt-multi-page-menu-section-renderer,
+html[data-veltrix-yt="true"] ytd-compact-link-renderer,
+html[data-veltrix-yt="true"] ytd-toggle-theme-compact-link-renderer,
+html[data-veltrix-yt="true"] ytd-notification-renderer,
+html[data-veltrix-yt="true"] #guide-wrapper.ytd-app,
+html[data-veltrix-yt="true"] #guide-content.ytd-app,
+html[data-veltrix-yt="true"] #header.ytd-app,
+html[data-veltrix-yt="true"] #guide-inner-content.ytd-app,
+html[data-veltrix-yt="true"] ytd-guide-renderer,
+html[data-veltrix-yt="true"] #sections.ytd-guide-renderer,
+html[data-veltrix-yt="true"] ytd-guide-section-renderer,
+html[data-veltrix-yt="true"] ytd-guide-collapsible-section-entry-renderer,
+html[data-veltrix-yt="true"] ytd-guide-collapsible-entry-renderer,
+html[data-veltrix-yt="true"] ytd-guide-entry-renderer,
+html[data-veltrix-yt="true"] ytd-mini-guide-entry-renderer,
+html[data-veltrix-yt="true"] #footer.ytd-guide-renderer,
+html[data-veltrix-yt="true"] #copyright,
+html[data-veltrix-yt="true"] tp-yt-paper-listbox,
+html[data-veltrix-yt="true"] tp-yt-paper-listbox#items,
+html[data-veltrix-yt="true"] ytd-menu-service-item-renderer,
+html[data-veltrix-yt="true"] ytd-menu-navigation-item-renderer,
+html[data-veltrix-yt="true"] ytd-unified-share-panel-renderer,
+html[data-veltrix-yt="true"] ytd-add-to-playlist-renderer,
+html[data-veltrix-yt="true"] .ytListViewModelHost,
+html[data-veltrix-yt="true"] .ytListItemViewModelHost,
+html[data-veltrix-yt="true"] .sbsb_a,
+html[data-veltrix-yt="true"] .sbsb_c {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Subtle glass dividers inside menus & sidebar */
+html[data-veltrix-yt="true"] ytd-active-account-header-renderer,
+html[data-veltrix-yt="true"] ytd-simple-menu-header-renderer,
+html[data-veltrix-yt="true"] yt-multi-page-menu-section-renderer,
+html[data-veltrix-yt="true"] ytd-guide-section-renderer,
+html[data-veltrix-yt="true"] ytd-guide-collapsible-section-entry-renderer {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Hover & active highlights for items inside blurred modals & drawer */
+html[data-veltrix-yt="true"] ytd-compact-link-renderer:hover,
+html[data-veltrix-yt="true"] ytd-toggle-theme-compact-link-renderer:hover,
+html[data-veltrix-yt="true"] ytd-notification-renderer:hover,
+html[data-veltrix-yt="true"] ytd-guide-entry-renderer:hover,
+html[data-veltrix-yt="true"] ytd-guide-entry-renderer[active],
+html[data-veltrix-yt="true"] ytd-menu-service-item-renderer:hover,
+html[data-veltrix-yt="true"] ytd-menu-navigation-item-renderer:hover,
+html[data-veltrix-yt="true"] .ytListItemViewModelHost:hover,
+html[data-veltrix-yt="true"] .ytSuggestionComponentSuggestion:hover,
+html[data-veltrix-yt="true"] .sbsb_c:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+}

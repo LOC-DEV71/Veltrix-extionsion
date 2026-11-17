@@ -28,6 +28,8 @@
   "products": [
     {
       "id": "chan-quang-cao",
+      "folder": "Products/anti-advertisement",
+      "icon": "icon.png",
       "zip": "veltrix-chan-quang-cao",
       "name": "Veltrix Chặn Quảng Cáo",
       "short": "Chặn quảng cáo, banner, popup trên web. Có danh sách lọc riêng cho web Việt.",
@@ -58,25 +60,12 @@
         "abpvn"
       ],
       "art": "adblock",
-      "cover": "/thumbs/chan-quang-cao.webp",
-      "icon": "/icons/chan-quang-cao.png",
-      "version": "1.2.1",
-      "zipUrl": "/downloads/veltrix-chan-quang-cao.zip",
-      "zipFolder": "veltrix-chan-quang-cao",
-      "size": 1008516,
-      "updated": "2026-11-17",
-      "permissions": [
-        "Đọc và thay đổi dữ liệu trên mọi trang web",
-        "Chặn hoặc cho phép yêu cầu mạng theo danh sách lọc",
-        "Đếm số yêu cầu mạng đã bị chặn",
-        "Lưu cài đặt của tiện ích trên máy bạn",
-        "Chèn mã và CSS vào trang web",
-        "Biết địa chỉ trang đang mở trong từng tab",
-        "Theo dõi yêu cầu mạng của trang"
-      ]
+      "cover": "/thumbs/chan-quang-cao.webp"
     },
     {
       "id": "ambient-light",
+      "folder": "Products/ambient-light",
+      "icon": "icons/icon128.png",
       "zip": "veltrix-ambient-light",
       "name": "Veltrix Ambient Light",
       "short": "Đèn nền Ambient Light cho YouTube: khung hình video tỏa ra khắp màn hình.",
@@ -107,18 +96,7 @@
         "8k"
       ],
       "art": "ambient",
-      "cover": "/thumbs/ambient-light.webp",
-      "icon": "/icons/ambient-light.png",
-      "version": "1.0.0",
-      "zipUrl": "/downloads/veltrix-ambient-light.zip",
-      "zipFolder": "veltrix-ambient-light",
-      "size": 47275,
-      "updated": "2026-11-17",
-      "permissions": [
-        "Đọc và thay đổi dữ liệu trên youtube.com",
-        "Lưu cài đặt của tiện ích trên máy bạn",
-        "Truy cập tab hiện tại khi bạn bấm vào tiện ích"
-      ]
+      "cover": "/thumbs/ambient-light.webp"
     }
   ]
 }

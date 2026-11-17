@@ -1,3 +1,15 @@
 node_modules/
 dist/
 .vercel/
+
+# Chrome tự sinh khi nạp extension
+_metadata/
+
+# Tạo tự động bởi scripts/build.mjs (Vercel chạy lúc build)
+web/public/downloads/
+web/public/icons/
+web/src/data/catalog.json
+
+Thumbs.db
+desktop.ini
+.DS_Store

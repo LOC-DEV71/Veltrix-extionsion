@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veltrix Ambient Light</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="veltrix-container">
+    <!-- Header -->
+    <header class="veltrix-header">
+      <div class="brand">
+        <div class="logo-box">
+          <img src="icons/icon48.png" alt="Veltrix Logo" class="brand-icon">
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">VELTRIX</div>
+          <div class="brand-subtitle">Cinema Ambient Light</div>
+        </div>
+      </div>
+      <!-- Power switch -->
+      <label class="switch-toggle" title="Bật / Tắt Veltrix Light">
+        <input type="checkbox" id="power-toggle" checked>
+        <span class="slider"></span>
+      </label>
+    </header>
+
+    <div class="divider"></div>
+
+    <!-- Controls Body -->
+    <main class="controls" id="controls-section">
+      <!-- Brightness -->
+      <div class="control-group">
+        <div class="group-header">
+          <span class="label">Độ sáng (Brightness)</span>
+          <span class="value" id="val-brightness">100%</span>
+        </div>
+        <input type="range" id="input-brightness" min="50" max="150" step="5" value="100">
+      </div>
+
+      <!-- Blur -->
+      <div class="control-group">
+        <div class="group-header">
+          <span class="label">Độ mờ tỏa (Blur Mịn)</span>
+          <span class="value" id="val-blur">32px</span>
+        </div>
+        <input type="range" id="input-blur" min="5" max="100" step="2" value="32">
+      </div>
+
+      <!-- Spread -->
+      <div class="control-group">
+        <div class="group-header">
+          <span class="label">Kích thước phóng to (Spread)</span>
+          <span class="value" id="val-spread">1.55x</span>
+        </div>
+        <input type="range" id="input-spread" min="1.1" max="2.5" step="0.05" value="1.55">
+      </div>
+
+      <!-- Saturation -->
+      <div class="control-group">
+        <div class="group-header">
+          <span class="label">Độ rực màu (Saturation)</span>
+          <span class="value" id="val-saturation">110%</span>
+        </div>
+        <input type="range" id="input-saturation" min="50" max="180" step="5" value="110">
+      </div>
+
+      <!-- FPS Selector -->
+      <div class="control-group">
+        <div class="group-header">
+          <span class="label">Tần số làm tươi (FPS / Hz)</span>
+          <span class="hint" id="val-fps-hint">Gaming 144Hz</span>
+        </div>
+        <div class="segmented-control" id="fps-group">
+          <button type="button" class="segment-btn" data-fps="15">15 FPS</button>
+          <button type="button" class="segment-btn" data-fps="30">30 FPS</button>
+          <button type="button" class="segment-btn" data-fps="60">60 FPS</button>
+          <button type="button" class="segment-btn active" data-fps="144">144 Hz</button>
+        </div>
+      </div>
+
+      <!-- Presets -->
+      <div class="control-group">
+        <span class="label preset-title">Chế độ mẫu</span>
+        <div class="preset-buttons">
+          <button type="button" class="preset-btn" id="preset-cinema">🎬 Dịu nhẹ</button>
+          <button type="button" class="preset-btn" id="preset-ultra">🚀 Toàn màn hình</button>
+          <button type="button" class="preset-btn" id="preset-default">↺ Chuẩn</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="veltrix-footer">
+      <span class="status-indicator"></span>
+      <span class="footer-text">Veltrix Suite •</span>
+      <a id="veltrix-store" class="footer-link" href="https://extension.veltrixhost.cloud" target="_blank" rel="noopener" title="extension.veltrixhost.cloud">Veltrix Store</a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

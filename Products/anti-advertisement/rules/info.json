@@ -1,0 +1,16 @@
+{
+ "builtAt": "2026-11-17T15:52:51.205Z",
+ "counts": {
+  "abpvn": {
+   "net": 387,
+   "css": 657
+  },
+  "easylist": {
+   "net": 48766,
+   "css": 24139
+  }
+ },
+ "rules": 49167,
+ "generic": 13660,
+ "sites": 8188
+}
