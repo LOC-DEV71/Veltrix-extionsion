@@ -254,15 +254,9 @@ ${hoverRule}
       '--primary-deemphasized-button-background': rgba(t.accent, 0.15), '--primary-deemphasized-button-text': t.accent,
       '--toggle-active-background': t.accent, '--toggle-active-icon': t.ink, '--progress-ring-blue-foreground': t.accent,
     });
-    const blurPx = t.blur > 0 ? t.blur : 0;
-    const blurDecl = blurPx > 0
-      ? `backdrop-filter:blur(${blurPx}px) saturate(140%)!important;-webkit-backdrop-filter:blur(${blurPx}px) saturate(140%)!important`
-      : `backdrop-filter:none!important;-webkit-backdrop-filter:none!important`;
-    const glassRule = (t.glass || t.hasBgImage)
-      ? `[role="banner"],[role="menu"],[role="dialog"]{background-color:${rgba(t.bg, 0.72)}!important;${blurDecl}}`
-      : '';
+    const glassRule = '';
     const bgImgCardRule = t.hasBgImage
-      ? `[role="main"],[role="feed"]{background:transparent!important}[role="article"],[data-pagelet*="FeedUnit"]>div,[role="navigation"],[role="complementary"],input[type="search"],[role="combobox"]{background-color:${panel}!important;${blurDecl}}`
+      ? `[role="main"],[role="feed"]{background:transparent!important}[role="article"],[data-pagelet*="FeedUnit"]>div,input[type="search"],[role="combobox"]{background-color:${panel}!important}`
       : '';
     const densityRule = t.density === 'compact'
       ? `[data-pagelet^="FeedUnit"]{margin-bottom:8px!important}`
