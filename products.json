@@ -102,6 +102,49 @@
       ],
       "art": "ambient",
       "cover": "/thumbs/ambient-light.webp"
+    },
+    {
+      "id": "veltrix-theme",
+      "folder": "Products/web-theme",
+      "icon": "icons/icon128.png",
+      "zip": "veltrix-theme",
+      "name": "Veltrix Theme",
+      "short": "Đổi màu giao diện YouTube, Facebook và Google Tìm kiếm theo 8 bộ theme sáng/tối và màu nhấn tuỳ chọn.",
+      "category": "look",
+      "featured": true,
+      "heroTitle": "Khoác màu mới cho trang quen thuộc",
+      "heroText": "8 bảng màu sáng/tối êm mắt cùng bộ chọn màu nhấn tự do cho YouTube, Facebook và Google Tìm kiếm.",
+      "description": [
+        "Veltrix Theme thay bộ biến màu gốc của YouTube, Facebook và các phần chính của Google Tìm kiếm ngay từ lúc trang bắt đầu tải (document_start), giúp giao diện đổi màu tức thì mà không bị nhá nền trắng hay đen mặc định.",
+        "Tiện ích có sẵn 8 bảng màu được phối kỹ gồm 5 theme tối (Veltrix Tím, Đêm Xanh, Rừng Thông, Hoàng Hôn, Đen OLED) và 3 theme sáng dịu mắt (Sakura, Bạc Hà, Giấy Ngà). Bạn có thể giữ màu nhấn của theme hoặc tự chọn bất kỳ màu nhấn nào cho nút bấm, liên kết và thanh tiến trình video.",
+        "Mọi thay đổi trong bảng điều khiển được áp dụng ngay lập tức trên các tab đang mở mà không cần tải lại trang. Bạn cũng có thể bật hoặc tắt riêng cho từng trang YouTube, Facebook hay Google."
+      ],
+      "features": [
+        "8 bộ giao diện sáng và tối phối sẵn đầy đủ màu sắc, font, bo góc và mật độ (Veltrix Tím, Đêm Xanh, Rừng Thông, Hoàng Hôn, Đen OLED, Sakura, Bạc Hà, Giấy Ngà)",
+        "4 font chữ đóng gói sẵn (Hệ thống, Be Vietnam Pro, Inter, Nunito) không phụ thuộc mạng, an toàn CSP",
+        "Tuỳ chỉnh bo góc (0 / 8 / 16px), hiệu ứng kính mờ (backdrop-filter), mật độ lưới (Gọn / Vừa / Thoáng) và cỡ chữ (90%–120%)",
+        "Chọn ảnh nền từ máy hoặc dùng gradient nền kèm khung nội dung trong suốt 85%",
+        "Hiệu ứng phóng to thumbnail + viền màu nhấn khi rê chuột",
+        "Tự chọn màu nhấn bất kỳ và tự động tính màu chữ tương phản trên nút bấm",
+        "Đổi giao diện ngay lập tức không cần tải lại trang, bật / tắt riêng từng trang YouTube, Facebook, Google Tìm kiếm"
+      ],
+      "notes": [
+        "Chỉ áp dụng cho 3 trang: YouTube, Facebook và Google Tìm kiếm (không ảnh hưởng Gmail, Google Docs hay Google Drive).",
+        "Google Tìm kiếm không có bộ biến màu công khai và thường xuyên đổi tên class CSS, nên phần đổi màu trên Google ở mức cơ bản (nền, chữ, ô tìm kiếm, tiêu đề kết quả).",
+        "Khi bật cùng Veltrix Ambient Light trên YouTube, hiệu ứng đèn nền video và kính mờ của Ambient Light sẽ đè lên nền trang xem video; nên chọn các theme tối hoặc tắt bớt một trong hai tiện ích trên YouTube nếu muốn giữ nguyên màu nền đặc của theme."
+      ],
+      "tags": [
+        "theme",
+        "giao diện",
+        "đổi màu",
+        "dark mode",
+        "youtube",
+        "facebook",
+        "google",
+        "màu sắc",
+        "oled"
+      ],
+      "art": "theme"
     }
   ]
 }

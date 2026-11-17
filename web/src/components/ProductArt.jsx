@@ -91,6 +91,101 @@ function AmbientArt({ uid }) {
   );
 }
 
+function ThemeArt({ uid }) {
+  return (
+    <svg viewBox="0 0 400 250" className="art" role="img" aria-label="Ba cửa sổ trình duyệt với ba bảng màu giao diện khác nhau">
+      <defs>
+        <linearGradient id={`${uid}-acc1`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#a78bfa" />
+          <stop offset="1" stopColor="#7c3aed" />
+        </linearGradient>
+        <linearGradient id={`${uid}-acc2`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#22d3ee" />
+          <stop offset="1" stopColor="#4ade80" />
+        </linearGradient>
+        <linearGradient id={`${uid}-acc3`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#f472b6" />
+          <stop offset="1" stopColor="#db2777" />
+        </linearGradient>
+        <filter id={`${uid}-sh`} x="-20%" y="-20%" width="140%" height="150%">
+          <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#000" floodOpacity=".38" />
+        </filter>
+      </defs>
+
+      {/* Cửa sổ 1 (trái sau): Đêm Xanh / Rừng Thông */}
+      <g filter={`url(#${uid}-sh)`} transform="translate(34 26)">
+        <rect width="196" height="126" rx="11" fill="#0b1220" stroke="#22304a" />
+        <path d="M11 0h174a11 11 0 0 1 11 11v13H0V11A11 11 0 0 1 11 0Z" fill="#111a2e" />
+        <circle cx="14" cy="12" r="3.2" fill="#f87171" />
+        <circle cx="24" cy="12" r="3.2" fill="#fbbf24" />
+        <circle cx="34" cy="12" r="3.2" fill="#34d399" />
+        <rect x="48" y="7" width="96" height="10" rx="5" fill="#1a2640" />
+        <rect x="14" y="36" width="110" height="62" rx="7" fill="#111a2e" />
+        <rect x="22" y="86" width="64" height="4" rx="2" fill={`url(#${uid}-acc2)`} />
+        <rect x="132" y="36" width="50" height="16" rx="5" fill="#1a2640" />
+        <rect x="132" y="58" width="50" height="16" rx="5" fill="#1a2640" />
+        <rect x="132" y="82" width="50" height="16" rx="8" fill={`url(#${uid}-acc2)`} />
+        <rect x="14" y="106" width="84" height="7" rx="3.5" fill="#94a3b8" opacity=".5" />
+      </g>
+
+      {/* Cửa sổ 2 (phải giữa): Sakura Sáng */}
+      <g filter={`url(#${uid}-sh)`} transform="translate(170 42)">
+        <rect width="196" height="126" rx="11" fill="#fff6f9" stroke="#f3d2df" />
+        <path d="M11 0h174a11 11 0 0 1 11 11v13H0V11A11 11 0 0 1 11 0Z" fill="#fde7ef" />
+        <circle cx="14" cy="12" r="3.2" fill="#f87171" />
+        <circle cx="24" cy="12" r="3.2" fill="#fbbf24" />
+        <circle cx="34" cy="12" r="3.2" fill="#34d399" />
+        <rect x="48" y="7" width="96" height="10" rx="5" fill="#ffffff" />
+        <rect x="14" y="36" width="44" height="76" rx="7" fill="#ffffff" stroke="#f3d2df" />
+        <rect x="66" y="36" width="116" height="42" rx="7" fill="#ffffff" stroke="#f3d2df" />
+        <rect x="76" y="46" width="68" height="7" rx="3.5" fill="#2b1720" opacity=".75" />
+        <rect x="76" y="60" width="46" height="10" rx="5" fill={`url(#${uid}-acc3)`} />
+        <rect x="66" y="86" width="116" height="26" rx="7" fill="#fde7ef" />
+      </g>
+
+      {/* Cửa sổ 3 (chính giữa trước): Veltrix Tím */}
+      <g filter={`url(#${uid}-sh)`} transform="translate(96 68)">
+        <rect width="208" height="132" rx="12" fill="#120f24" stroke="#a78bfa" strokeOpacity=".65" strokeWidth="1.5" />
+        <path d="M12 0h184a12 12 0 0 1 12 12v14H0V12A12 12 0 0 1 12 0Z" fill="#1b1733" />
+        <circle cx="15" cy="13" r="3.5" fill="#f87171" />
+        <circle cx="26" cy="13" r="3.5" fill="#fbbf24" />
+        <circle cx="37" cy="13" r="3.5" fill="#34d399" />
+        <rect x="52" y="8" width="108" height="10" rx="5" fill="#272050" />
+        <rect x="16" y="38" width="118" height="64" rx="8" fill="#1b1733" stroke="#2d2752" />
+        <circle cx="75" cy="66" r="13" fill={`url(#${uid}-acc1)`} />
+        <path d="M72 60l9 6-9 6Z" fill="#fff" />
+        <rect x="26" y="90" width="98" height="4" rx="2" fill="#272050" />
+        <rect x="26" y="90" width="58" height="4" rx="2" fill="#a78bfa" />
+        <rect x="142" y="38" width="50" height="20" rx="6" fill={`url(#${uid}-acc1)`} />
+        <rect x="142" y="64" width="50" height="16" rx="5" fill="#1b1733" />
+        <rect x="142" y="86" width="50" height="16" rx="5" fill="#1b1733" />
+        <rect x="16" y="110" width="88" height="8" rx="4" fill="#ece9ff" opacity=".85" />
+        <rect x="112" y="110" width="54" height="8" rx="4" fill="#a8a2cc" opacity=".5" />
+      </g>
+
+      {/* Dãy chấm màu bảng theme phía dưới */}
+      <g filter={`url(#${uid}-sh)`}>
+        <rect x="102" y="210" width="196" height="28" rx="14" fill="rgba(18,15,36,.92)" stroke="#2d2752" />
+        {[
+          '#a78bfa',
+          '#22d3ee',
+          '#4ade80',
+          '#fb923c',
+          '#e5e5e5',
+          '#db2777',
+          '#0d9488',
+          '#b45309'
+        ].map((color, i) => (
+          <g key={color} transform={`translate(${122 + i * 22} 224)`}>
+            <circle r="7" fill={color} />
+            {i === 0 && <circle r="9.5" fill="none" stroke="#fff" strokeWidth="1.5" />}
+          </g>
+        ))}
+      </g>
+    </svg>
+  );
+}
+
 function GuideArt() {
   const steps = ['Tải file .zip', 'Giải nén', 'Nạp vào trình duyệt'];
   return (
@@ -107,7 +202,7 @@ function GuideArt() {
   );
 }
 
-const ARTS = { adblock: AdblockArt, ambient: AmbientArt, guide: GuideArt };
+const ARTS = { adblock: AdblockArt, ambient: AmbientArt, theme: ThemeArt, guide: GuideArt };
 
 export default function ProductArt({ kind }) {
   // id riêng cho mỗi hình để gradient/filter không đụng nhau khi có nhiều hình trên trang

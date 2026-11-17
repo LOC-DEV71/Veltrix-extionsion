@@ -19,6 +19,7 @@ const PERMISSION_TEXT = {
   declarativeNetRequest: 'Chặn hoặc cho phép yêu cầu mạng theo danh sách lọc',
   declarativeNetRequestFeedback: 'Đếm số yêu cầu mạng đã bị chặn',
   storage: 'Lưu cài đặt của tiện ích trên máy bạn',
+  unlimitedStorage: 'Lưu ảnh nền dung lượng lớn trên máy bạn',
   scripting: 'Chèn mã và CSS vào trang web',
   tabs: 'Biết địa chỉ trang đang mở trong từng tab',
   webRequest: 'Theo dõi yêu cầu mạng của trang',
