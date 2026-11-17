@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const hoverToggle = document.getElementById('hover-toggle');
   const blurRange = document.getElementById('blur-range');
   const blurVal = document.getElementById('blur-val');
+  const opacityRange = document.getElementById('opacity-range');
+  const opacityVal = document.getElementById('opacity-val');
   const bgState = document.getElementById('bg-state');
   const bgFileInput = document.getElementById('bg-file');
   const bgClearBtn = document.getElementById('bg-clear');
@@ -61,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
       (state.radius !== null && state.radius !== undefined && state.radius !== '') ||
       typeof state.glass === 'boolean' ||
       (state.blur !== null && state.blur !== undefined && state.blur !== '') ||
+      (state.panelOpacity !== null && state.panelOpacity !== undefined && state.panelOpacity !== '') ||
       state.background ||
       state.density ||
       (state.fontScale !== null && state.fontScale !== undefined && state.fontScale !== '') ||
@@ -106,6 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
     hoverToggle.checked = Boolean(resolved.hover);
     blurRange.value = String(resolved.blur);
     blurVal.textContent = `${resolved.blur}px`;
+    opacityRange.value = String(resolved.panelOpacity);
+    opacityVal.textContent = `${Math.round(resolved.panelOpacity * 100)}%`;
 
     if (state.background?.startsWith('data:')) bgState.textContent = 'Ảnh tuỳ chọn';
     else if (state.background === 'none') bgState.textContent = 'Đã tắt';
@@ -159,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
   glassToggle.addEventListener('change', (e) => save({ glass: e.target.checked }));
   hoverToggle.addEventListener('change', (e) => save({ hover: e.target.checked }));
   blurRange.addEventListener('input', (e) => save({ blur: Number(e.target.value) }));
+  opacityRange.addEventListener('input', (e) => save({ panelOpacity: Number(e.target.value) }));
 
   bgFileInput.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
@@ -182,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
       radius: null,
       glass: null,
       blur: null,
+      panelOpacity: null,
       background: '',
       density: '',
       fontScale: null,

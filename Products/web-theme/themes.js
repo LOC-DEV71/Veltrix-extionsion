@@ -70,6 +70,7 @@
     radius: null,
     glass: null,
     blur: null,
+    panelOpacity: null,
     background: '',
     density: '',
     fontScale: null,
@@ -113,8 +114,10 @@
     const hasBgImage = Boolean(background && background.startsWith('data:'));
     const hasCustomBlur = s.blur !== null && s.blur !== undefined && s.blur !== '';
     const blur = hasCustomBlur ? Number(s.blur) : (hasBgImage ? Math.max(16, base.blur) : (glass ? base.blur : 0));
-    const surfacePanel = hasBgImage ? rgba(base.surface, 0.85) : base.surface;
-    return { ...base, accent, ink: inkOn(accent), font, radius, glass, blur, background, density, fontScale, hover, hasBgImage, surfacePanel };
+    const hasCustomOpacity = s.panelOpacity !== null && s.panelOpacity !== undefined && s.panelOpacity !== '';
+    const panelOpacity = hasCustomOpacity ? Number(s.panelOpacity) : 0.48;
+    const surfacePanel = hasBgImage ? rgba(base.surface, panelOpacity) : base.surface;
+    return { ...base, accent, ink: inkOn(accent), font, radius, glass, blur, panelOpacity, background, density, fontScale, hover, hasBgImage, surfacePanel };
   }
 
   function fontUrl(file) {
@@ -188,7 +191,7 @@
       ? `backdrop-filter:blur(${blurPx}px) saturate(140%)!important;-webkit-backdrop-filter:blur(${blurPx}px) saturate(140%)!important`
       : `backdrop-filter:none!important;-webkit-backdrop-filter:none!important`;
 
-    const headerBg = (t.glass || t.hasBgImage) ? rgba(t.bg, 0.72) : t.bg;
+    const headerBg = (t.glass || t.hasBgImage) ? rgba(t.bg, t.hasBgImage ? Math.min(0.65, t.panelOpacity + 0.1) : 0.72) : t.bg;
     const glassRule = (t.glass || t.hasBgImage)
       ? `#frosted-glass.with-chipbar.ytd-app,#frosted-glass.loading-with-chipbar.ytd-app,ytd-masthead #background.ytd-masthead,ytd-masthead.shell,ytd-masthead.shell.dark,ytd-multi-page-menu-renderer,ytd-menu-popup-renderer,tp-yt-paper-dialog,.ytSearchboxComponentSuggestionsContainer{background:${headerBg}!important;background-color:${headerBg}!important;${blurDecl}}`
       : `#frosted-glass.with-chipbar.ytd-app,#frosted-glass.loading-with-chipbar.ytd-app,ytd-masthead #background.ytd-masthead,ytd-masthead.shell,ytd-masthead.shell.dark{background:${headerBg}!important;background-color:${headerBg}!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}`;
@@ -204,7 +207,7 @@
       : '';
 
     const bgImgCardRule = t.hasBgImage
-      ? `ytd-app,ytd-page-manager,#page-manager,#content.ytd-app,ytd-browse,ytd-watch-flexy,#columns,#primary,#secondary{background:transparent!important;background-color:transparent!important}
+      ? `ytd-app,ytd-page-manager,#page-manager,#content.ytd-app,ytd-browse,ytd-two-column-browse-results-renderer,ytd-rich-grid-renderer,ytd-watch-flexy,#columns,#primary,#secondary{background:transparent!important;background-color:transparent!important}
 ytd-rich-item-renderer #content,ytd-watch-metadata,ytd-comments,ytd-guide-renderer,#guide-content.ytd-app,tp-yt-app-drawer#guide #contentContainer.tp-yt-app-drawer,ytd-mini-guide-renderer,.ytSearchboxComponentInputBox,ytd-searchbox #container.ytd-searchbox,.ytChipShapeInactive,ytd-playlist-panel-renderer,#secondary-inner ytd-compact-video-renderer{background-color:${panel}!important;border-radius:${t.radius}px!important;${blurDecl}}`
       : `ytd-guide-renderer,#guide-content.ytd-app,tp-yt-app-drawer#guide #contentContainer.tp-yt-app-drawer,ytd-mini-guide-renderer{background-color:${t.bg}!important;color:${t.text}!important}`;
 
