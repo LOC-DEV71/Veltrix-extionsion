@@ -602,3 +602,18 @@ body {
 .footer-link:hover {
   text-decoration: underline;
 }
+
+/* ---- Chỉnh ảnh nền ---- */
+.bg-editor { margin-top: 10px; display: grid; gap: 8px; }
+.bg-editor[hidden] { display: none; }
+.bg-preview { position: relative; width: 100%; border-radius: 10px; border: 1px solid var(--border, rgba(255,255,255,.12));
+  background-color: #000; background-repeat: no-repeat; cursor: grab; touch-action: none; overflow: hidden; }
+.bg-preview.dragging { cursor: grabbing; }
+.bg-hint { position: absolute; left: 8px; bottom: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,.55);
+  color: #fff; font-size: 11px; pointer-events: none; transition: opacity .2s; }
+.bg-preview-wrap { position: relative; border-radius: 10px; overflow: hidden; }
+.bg-preview.dragging + .bg-hint { opacity: 0; }
+.bg-tools { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.bg-fit { display: inline-flex; padding: 3px; border-radius: 9px; background: rgba(127,127,127,.15); }
+.bg-fit button { all: unset; cursor: pointer; padding: 4px 10px; border-radius: 7px; font-size: 12px; font-weight: 600; }
+.bg-fit button.active { background: var(--accent); color: var(--ink, #fff); }

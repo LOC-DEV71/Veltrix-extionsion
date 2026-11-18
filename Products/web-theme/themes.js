@@ -72,6 +72,11 @@
     blur: null,
     panelOpacity: null,
     background: '',
+    bgX: 50, // vị trí ảnh nền (%), người dùng kéo trong popup để giữ phần chính của ảnh
+    bgY: 50,
+    bgFit: 'cover', // 'cover' phủ kín (có cắt) | 'contain' vừa khung (hiện trọn ảnh)
+    bgBlur: null, // làm mờ ảnh / video nền (px); null = 8
+    bgDim: null, // phủ màu nền theme lên ảnh / video (0–0.8) cho chữ dễ đọc; null = 0.4
     density: '',
     fontScale: null,
     hover: null,
@@ -98,7 +103,12 @@
   const hex = (h) => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
   const rgba = (h, a) => `rgba(${hex(h).join(',')},${a})`;
   // Chữ trên nền màu nhấn: đen hay trắng tùy độ sáng của màu nhấn.
-  const inkOn = (h) => { const [r, g, b] = hex(h).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.45 ? '#111111' : '#ffffff'; };
+  // Chữ trên nền màu nhấn: đen hay trắng, chọn bên có tương phản CAO HƠN (ngưỡng cũ 0.45 chọn chữ trắng trên tím nhạt
+  // #a78bfa: 2.6:1, khó đọc; chữ đen 8:1).
+  const inkOn = (h) => { const [r, g, b] = hex(h).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); const L = 0.2126 * r + 0.7152 * g + 0.0722 * b; return (L + 0.05) / 0.05 >= 1.05 / (L + 0.05) ? '#111111' : '#ffffff'; };
+
+  const lum = (h) => { const [r, g, b] = hex(h).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 
   function resolve(settings) {
     const s = { ...DEFAULTS, ...settings, sites: { ...DEFAULTS.sites, ...(settings?.sites || {}) } };
@@ -111,13 +121,45 @@
     const density = s.density || base.density;
     const fontScale = s.fontScale !== null && s.fontScale !== undefined && s.fontScale !== '' ? Number(s.fontScale) : base.fontScale;
     const hover = typeof s.hover === 'boolean' ? s.hover : base.hover;
-    const hasBgImage = Boolean(background && background.startsWith('data:'));
+    // 'video' = nền video (content.js đặt khung bg.html phía sau trang); trang xử lý giống nền ảnh: các khung trong suốt.
+    const hasBgImage = Boolean(background && (background.startsWith('data:') || background === 'video'));
     const hasCustomBlur = s.blur !== null && s.blur !== undefined && s.blur !== '';
     const blur = hasCustomBlur ? Number(s.blur) : (hasBgImage ? Math.max(16, base.blur) : (glass ? base.blur : 0));
     const hasCustomOpacity = s.panelOpacity !== null && s.panelOpacity !== undefined && s.panelOpacity !== '';
-    const panelOpacity = hasCustomOpacity ? Number(s.panelOpacity) : 0.48;
-    const surfacePanel = hasBgImage ? rgba(base.surface, panelOpacity) : base.surface;
-    return { ...base, accent, ink: inkOn(accent), font, radius, glass, blur, panelOpacity, background, density, fontScale, hover, hasBgImage, surfacePanel };
+    const panelOpacity = hasCustomOpacity ? Number(s.panelOpacity) : 0.72; // 0.48 cũ: chữ trên khung khó đọc khi ảnh rực màu
+    let surfacePanel = hasBgImage ? rgba(base.surface, panelOpacity) : base.surface;
+    const bgX = Number.isFinite(Number(s.bgX)) ? Math.min(100, Math.max(0, Number(s.bgX))) : 50;
+    const bgY = Number.isFinite(Number(s.bgY)) ? Math.min(100, Math.max(0, Number(s.bgY))) : 50;
+    const bgFit = s.bgFit === 'contain' ? 'contain' : 'cover';
+    const bgBlur = s.bgBlur !== null && s.bgBlur !== undefined && s.bgBlur !== '' ? Math.min(40, Math.max(0, Number(s.bgBlur))) : 8;
+    const bgDim = s.bgDim !== null && s.bgDim !== undefined && s.bgDim !== '' ? Math.min(0.85, Math.max(0, Number(s.bgDim))) : 0.4;
+    // Tương phản thông minh: popup đo độ sáng ảnh / video nền (bgLum, 0–1). Giữ nguyên theme người dùng chọn, chỉ TỰ TĂNG
+    // lớp phủ màu theme (bgDim) vừa đủ để chữ của theme đạt tương phản 4.5:1 với nền. Bản đầu lật cả theme sang sáng / tối
+    // → chọn theme tối lại ra trang trắng, popup chữ tối trên nền tối (lỗi 2026-11-19). Chỉ khi cần phủ > 85% mới đổi tông chữ.
+    let { text, muted, dark, surface2, border } = base;
+    let veilDim = bgDim;
+    if (hasBgImage && typeof s.bgLum === 'number') {
+      const L = s.bgLum, Lb = lum(base.bg), Lt = lum(text);
+      const textIsLight = Lt > Lb;
+      const target = textIsLight ? (Lt + 0.05) / 4.5 - 0.05 : 4.5 * (Lt + 0.05) - 0.05; // độ sáng nền tối đa / tối thiểu
+      const ok = (d) => { const e = L * (1 - d) + Lb * d; return textIsLight ? e <= target : e >= target; };
+      if (!ok(veilDim)) {
+        const need = textIsLight ? (L - target) / (L - Lb) : (target - L) / (Lb - L);
+        if (Number.isFinite(need) && need <= 0.85) veilDim = Math.min(0.85, Math.max(veilDim, need + 0.02));
+        else {
+          const e = L * (1 - veilDim) + Lb * veilDim, light = e > 0.18;
+          text = light ? '#121216' : '#f4f4f8';
+          muted = light ? '#3f3f4a' : '#d2d2dc';
+          dark = !light;
+          surfacePanel = light ? `rgba(255,255,255,${panelOpacity})` : `rgba(14,14,20,${panelOpacity})`;
+          surface2 = light ? 'rgba(255,255,255,0.85)' : 'rgba(30,30,40,0.85)';
+          border = light ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)';
+        }
+      }
+    }
+    // Viền chữ mảnh khi có ảnh / video nền: chỗ ảnh lúc sáng lúc tối vẫn đọc được.
+    const halo = hasBgImage ? (lum(text) < 0.3 ? 'rgba(255,255,255,.55)' : 'rgba(0,0,0,.6)') : '';
+    return { ...base, text, muted, dark, surface2, border, halo, bgX, bgY, bgFit, bgBlur, bgDim: veilDim, bgDimUser: bgDim, accent, ink: inkOn(accent), font, radius, glass, blur, panelOpacity, background, density, fontScale, hover, hasBgImage, surfacePanel };
   }
 
   function fontUrl(file) {
@@ -140,13 +182,27 @@
     return `'${fontName}',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
   }
 
+  // Nền ảnh / video: không đặt thẳng lên html / body (không làm mờ được) mà vẽ trên lớp cố định phía sau trang:
+  //  - ảnh: html::before = lớp phủ màu theme + ảnh, rồi filter: blur
+  //  - video: content.js đặt khung bg.html (z-index:-1, tự làm mờ); html::after phủ màu theme đè lên khung
+  // body / html phải trong suốt để thấy lớp phía sau (:root:root để thắng html[dark] của YouTube).
   function backgroundCss(t, extraTargets = '') {
     if (!t.background || t.background === 'none') return '';
+    const clear = `:root:root,:root:root body${extraTargets}{background:transparent!important;background-image:none!important}`;
+    const veil = rgba(t.bg, t.bgDim);
+    if (t.background === 'video') {
+      return `${clear}html::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:${veil}}`;
+    }
     if (t.hasBgImage) {
-      return `html,body${extraTargets}{background-color:${t.bg}!important;background-image:url("${t.background}")!important;background-size:cover!important;background-position:center!important;background-attachment:fixed!important;background-repeat:no-repeat!important}`;
+      const pad = t.bgBlur * 2; // tràn ra ngoài để mép ảnh mờ không lộ viền sáng
+      return `${clear}html::before{content:"";position:fixed;inset:-${pad}px;z-index:-1;pointer-events:none;background-image:linear-gradient(${veil},${veil}),url("${t.background}");background-size:100% 100%,${t.bgFit};background-position:0 0,${t.bgX}% ${t.bgY}%;background-repeat:no-repeat;background-color:${t.bg};filter:${t.bgBlur ? `blur(${t.bgBlur}px)` : 'none'}}`;
     }
     return `html,body${extraTargets}{background-color:${t.bg}!important;background-image:${t.background}!important;background-attachment:fixed!important}`;
   }
+
+
+  // Font cho MỌI phần tử (tiêu đề video, nút… có font riêng nên chỉ đặt cho body là không ăn), trừ icon dạng font / SVG.
+  const allFont = (ff) => `:where(body,body *:not(svg,svg *,i,[class*="material"],[class*="symbol"],[class*="Symbol"],[class*="icon-font"])){font-family:${ff}!important}`;
 
   const vars = (map) => Object.entries(map).map(([k, v]) => `${k}:${v}!important`).join(';');
 
@@ -161,7 +217,7 @@
       '--yt-spec-general-background-c': panel,
       '--yt-spec-brand-background-solid': t.bg, '--yt-spec-brand-background-primary': rgba(t.bg, 0.92), '--yt-spec-brand-background-secondary': rgba(t.bg, 0.8),
       '--yt-spec-text-primary': t.text, '--yt-spec-text-secondary': t.muted, '--yt-spec-text-disabled': rgba(t.muted, 0.6),
-      '--yt-spec-text-primary-inverse': t.ink, '--yt-spec-inverted-background': t.accent,
+      '--yt-spec-text-primary-inverse': t.bg, '--yt-spec-inverted-background': t.text,
       '--yt-spec-icon-inactive': t.muted, '--yt-spec-icon-active-other': t.text, '--yt-spec-icon-disabled': rgba(t.muted, 0.5),
       '--yt-spec-10-percent-layer': t.border, '--yt-spec-outline': t.border, '--yt-spec-additive-background': rgba(t.text, 0.06),
       '--yt-spec-badge-chip-background': t.surface2, '--yt-spec-button-chip-background-hover': rgba(t.text, 0.12),
@@ -173,8 +229,8 @@
       '--yt-sys-color-baseline--frosted-glass-desktop': rgba(t.bg, t.glass ? 0.72 : 0.95),
       '--yt-sys-color-baseline--frosted-glass-mobile': rgba(t.bg, t.glass ? 0.72 : 0.95),
       '--yt-sys-color-baseline--text-primary': t.text, '--yt-sys-color-baseline--text-secondary': t.muted,
-      '--yt-sys-color-baseline--text-disabled': rgba(t.muted, 0.6), '--yt-sys-color-baseline--text-primary-inverse': t.ink,
-      '--yt-sys-color-baseline--inverted-background': t.accent, '--yt-sys-color-baseline--call-to-action': t.accent,
+      '--yt-sys-color-baseline--text-disabled': rgba(t.muted, 0.6), '--yt-sys-color-baseline--text-primary-inverse': t.bg,
+      '--yt-sys-color-baseline--inverted-background': t.text, '--yt-sys-color-baseline--call-to-action': t.accent,
       '--yt-sys-color-baseline--outline': t.border, '--yt-sys-color-baseline--additive-background': t.surface2,
       '--yt-sys-color-baseline--tonal-background': t.surface2, '--yt-sys-color-baseline--button-chip-background-hover': rgba(t.text, 0.14),
       '--t3e41d7b17b187f69': t.hasBgImage ? 'transparent' : t.bg,
@@ -183,7 +239,7 @@
       '--tffc2fd3a644f6275': t.text, '--t285d1cbb17921f77': t.text, '--t4a6da19e16bf221a': t.muted, '--t7e34d5baa4ea6277': rgba(t.muted, 0.6),
       '--tf3fc855af2285f5f': t.border, '--t416e5931fc464589': rgba(t.text, 0.14),
       '--t7f4f2c6d54836ce0': t.surface2, '--tc87f6a7f05e65fc4': t.surface2,
-      '--t1405e70a39276293': t.accent, '--t6216186c28b3834b': t.ink, '--t2d807bb79e75606d': t.accent, '--t617db776af0de196': t.accent,
+      '--t1405e70a39276293': t.text, '--t6216186c28b3834b': t.bg, '--t2d807bb79e75606d': t.accent, '--t617db776af0de196': t.accent,
     });
 
     const blurPx = t.blur > 0 ? t.blur : 0;
@@ -191,7 +247,7 @@
       ? `backdrop-filter:blur(${blurPx}px) saturate(140%)!important;-webkit-backdrop-filter:blur(${blurPx}px) saturate(140%)!important`
       : `backdrop-filter:none!important;-webkit-backdrop-filter:none!important`;
 
-    const headerBg = (t.glass || t.hasBgImage) ? rgba(t.bg, t.hasBgImage ? Math.min(0.65, t.panelOpacity + 0.1) : 0.72) : t.bg;
+    const headerBg = t.hasBgImage ? (t.dark ? 'rgba(14,14,20,.9)' : 'rgba(255,255,255,.9)') : t.glass ? rgba(t.bg, 0.82) : t.bg;
     const glassRule = (t.glass || t.hasBgImage)
       ? `#frosted-glass.with-chipbar.ytd-app,#frosted-glass.loading-with-chipbar.ytd-app,ytd-masthead #background.ytd-masthead,ytd-masthead.shell,ytd-masthead.shell.dark,ytd-multi-page-menu-renderer,ytd-menu-popup-renderer,tp-yt-paper-dialog,.ytSearchboxComponentSuggestionsContainer{background:${headerBg}!important;background-color:${headerBg}!important;${blurDecl}}`
       : `#frosted-glass.with-chipbar.ytd-app,#frosted-glass.loading-with-chipbar.ytd-app,ytd-masthead #background.ytd-masthead,ytd-masthead.shell,ytd-masthead.shell.dark{background:${headerBg}!important;background-color:${headerBg}!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}`;
@@ -203,22 +259,27 @@
         : '';
 
     const hoverRule = t.hover
-      ? `ytd-thumbnail,yt-thumbnail-view-model,#thumbnail{transition:transform .18s ease,outline-color .18s ease!important}ytd-rich-item-renderer:hover ytd-thumbnail,ytd-rich-item-renderer:hover yt-thumbnail-view-model,ytd-compact-video-renderer:hover ytd-thumbnail{transform:scale(1.03)!important;outline:2px solid ${t.accent}!important;outline-offset:-2px!important}`
+      ? `ytd-thumbnail,yt-thumbnail-view-model,#thumbnail{overflow:hidden!important}ytd-thumbnail img,yt-thumbnail-view-model img{transition:transform .2s ease!important}ytd-rich-item-renderer:hover ytd-thumbnail img,ytd-rich-item-renderer:hover yt-thumbnail-view-model img,ytd-compact-video-renderer:hover ytd-thumbnail img,yt-lockup-view-model:hover yt-thumbnail-view-model img{transform:scale(1.05)!important}ytd-rich-item-renderer:hover ytd-thumbnail,ytd-rich-item-renderer:hover yt-thumbnail-view-model,yt-lockup-view-model:hover yt-thumbnail-view-model{outline:2px solid ${t.accent}!important;outline-offset:-2px!important}`
       : '';
 
     const bgImgCardRule = t.hasBgImage
       ? `ytd-app,ytd-page-manager,#page-manager,#content.ytd-app,ytd-browse,ytd-two-column-browse-results-renderer,ytd-rich-grid-renderer,ytd-watch-flexy,#columns,#primary,#secondary{background:transparent!important;background-color:transparent!important}
-ytd-rich-item-renderer #content,ytd-watch-metadata,ytd-comments,ytd-guide-renderer,#guide-content.ytd-app,tp-yt-app-drawer#guide #contentContainer.tp-yt-app-drawer,ytd-mini-guide-renderer,.ytSearchboxComponentInputBox,ytd-searchbox #container.ytd-searchbox,.ytChipShapeInactive,ytd-playlist-panel-renderer,#secondary-inner ytd-compact-video-renderer{background-color:${panel}!important;border-radius:${t.radius}px!important;${blurDecl}}`
+ytd-rich-item-renderer #content,ytd-watch-metadata,ytd-comments,ytd-guide-renderer,#guide-content.ytd-app,tp-yt-app-drawer#guide #contentContainer.tp-yt-app-drawer,ytd-mini-guide-renderer,.ytSearchboxComponentInputBox,ytd-searchbox #container.ytd-searchbox,.ytChipShapeInactive,ytd-playlist-panel-renderer,#secondary-inner ytd-compact-video-renderer,#secondary yt-lockup-view-model,ytd-watch-next-secondary-results-renderer yt-lockup-view-model,ytd-rich-item-renderer yt-lockup-view-model,ytd-watch-metadata #description{background-color:${panel}!important;border-radius:${t.radius}px!important;${blurDecl}}`
       : `ytd-guide-renderer,#guide-content.ytd-app,tp-yt-app-drawer#guide #contentContainer.tp-yt-app-drawer,ytd-mini-guide-renderer{background-color:${t.bg}!important;color:${t.text}!important}`;
 
-    return `${fontFacesCss(t.font)}
+    return `${allFont(ff)}
 html,html[dark],html[darker-dark-theme],html[color-version],html[color-version][dark],[dark],[light],ytd-app{${v};color-scheme:${t.dark ? 'dark' : 'light'}}
 html,html[dark],html[darker-dark-theme]{font-size:${(62.5 * t.fontScale).toFixed(2)}%!important}
 html,html[dark],html[darker-dark-theme],body,ytd-app{background-color:${t.bg}!important;color:${t.text}!important;font-family:${ff}!important}
 body,ytd-app,input,textarea,button,select,yt-formatted-string,.yt-core-attributed-string{font-family:${ff}!important}
 ${backgroundCss(t)}
+${t.hasBgImage ? `/* Veltrix Ambient Light đang chiếu khung hình video ra sau trang (trang xem video): nhường nền cho nó, khỏi chồng 2 lớp nền */
+:root:root[data-veltrix-yt="true"]:has(.veltrix-ambient-canvas:not(.veltrix-hidden))::before,:root:root[data-veltrix-yt="true"]:has(.veltrix-ambient-canvas:not(.veltrix-hidden))::after{display:none!important}
+:root:root[data-veltrix-yt="true"]:has(.veltrix-ambient-canvas:not(.veltrix-hidden)) #veltrix-bg-video{display:none!important}
+:root:root[data-veltrix-yt="true"]:has(.veltrix-ambient-canvas:not(.veltrix-hidden)){background:${t.bg}!important}` : ''}
 ${glassRule}
 ${bgImgCardRule}
+${t.hasBgImage ? `#cinematics,#cinematics-container,ytd-cinematics,ytd-watch-flexy #cinematics,ytd-watch-grid #cinematics{display:none!important}[data-vx-clear-before]::before,[data-vx-clear-after]::after{background:transparent!important;background-image:none!important}`+`ytd-shorts #cinematic-container,ytd-reel-video-renderer #cinematic-container,#shorts-container #cinematic-container{display:none!important}ytd-shorts,#shorts-container,#shorts-inner-container,ytd-reel-video-renderer,.reel-video-in-sequence,.reel-video-in-sequence-new{background:transparent!important}` : ''}
 #home-chips,html[darker-dark-theme] #home-chips,ytd-feed-filter-chip-bar-renderer #chips-wrapper.ytd-feed-filter-chip-bar-renderer{background-color:transparent!important}
 .ytSearchboxComponentInputBox,ytd-searchbox #container.ytd-searchbox{background:${panel}!important;background-color:${panel}!important;border-color:${t.border}!important;color:${t.text}!important;border-radius:${t.radius}px!important}
 .ytSearchboxComponentInputBox input,ytd-searchbox input,input#search{color:${t.text}!important}
@@ -230,13 +291,14 @@ ytd-guide-entry-renderer #endpoint,ytd-mini-guide-entry-renderer #endpoint,.titl
 .ytChipShapeInactive,yt-chip-cloud-chip-renderer:not([selected]) #chip-container{background-color:${t.surface2}!important;color:${t.text}!important;border-radius:${t.radius}px!important}
 ytd-thumbnail,#thumbnail,yt-thumbnail-view-model,.ytThumbnailViewModelImage,#movie_player,.yt-spec-button-shape-next,tp-yt-paper-dialog,ytd-multi-page-menu-renderer,ytd-menu-popup-renderer{border-radius:${t.radius}px!important;overflow:hidden}
 /* Nút Đăng ký, chip đang chọn, thanh tiến trình */
-.yt-spec-button-shape-next--filled.yt-spec-button-shape-next--mono{background-color:${t.accent}!important;color:${t.ink}!important}
+.yt-spec-button-shape-next--filled.yt-spec-button-shape-next--mono{background-color:${t.accent}!important;color:${t.ink}!important}.yt-spec-button-shape-next--filled.yt-spec-button-shape-next--mono *{color:inherit!important;fill:currentColor!important}
 .ytChipShapeActive,yt-chip-cloud-chip-renderer[selected] #chip-container{background-color:${t.accent}!important;color:${t.ink}!important;border-radius:${t.radius}px!important}
 .ytp-play-progress,.ytp-swatch-background-color,.ytp-volume-slider-handle,.ytp-volume-slider-handle::before{background:${t.accent}!important}
 .ytp-scrubber-button.ytp-swatch-background-color{background:${t.accent}!important}
 ${densityRule}
 ${hoverRule}
-::selection{background:${rgba(t.accent, 0.35)}}`;
+::selection{background:${rgba(t.accent, 0.35)}}
+${t.halo ? `:root:root body :where(h1,h2,h3,h4,a,span,p,yt-formatted-string,.yt-core-attributed-string){text-shadow:0 0 2px ${t.halo},0 1px 3px ${t.halo}}` : ''}`;
   }
 
   function facebook(t) {
@@ -263,10 +325,11 @@ ${hoverRule}
       : t.density === 'comfy'
         ? `[data-pagelet^="FeedUnit"]{margin-bottom:24px!important}`
         : '';
+    // Facebook: khung ảnh không cắt phần tràn → không phóng to (sẽ đè chữ), chỉ viền màu nhấn.
     const hoverRule = t.hover
-      ? `[data-pagelet^="FeedUnit"] img,[role="article"] a img{transition:transform .18s ease,outline-color .18s ease!important}[data-pagelet^="FeedUnit"] a:hover img,[role="article"] a:hover img{transform:scale(1.03)!important;outline:2px solid ${t.accent}!important;outline-offset:-2px!important}`
+      ? `[role="article"] a:hover img{outline:2px solid ${t.accent}!important;outline-offset:-2px!important}`
       : '';
-    return `${fontFacesCss(t.font)}
+    return `${allFont(ff)}
 :root,.__fb-light-mode,.__fb-dark-mode{${v};color-scheme:${t.dark ? 'dark' : 'light'}}
 html{font-size:${Math.round(t.fontScale * 100)}%!important}
 body{background-color:${t.bg}!important;color:${t.text}!important;font-family:${ff}!important}
@@ -277,7 +340,8 @@ ${bgImgCardRule}
 [role="article"],[data-pagelet*="FeedUnit"]>div,input[type="search"],[role="combobox"],[role="dialog"],[role="menu"]{border-radius:${t.radius}px!important}
 ${densityRule}
 ${hoverRule}
-::selection{background:${rgba(t.accent, 0.35)}}`;
+::selection{background:${rgba(t.accent, 0.35)}}
+${t.halo ? `:root:root body :where(h1,h2,h3,h4,a,span,p,yt-formatted-string,.yt-core-attributed-string){text-shadow:0 0 2px ${t.halo},0 1px 3px ${t.halo}}` : ''}`;
   }
 
   function google(t) {
@@ -296,9 +360,9 @@ ${hoverRule}
         ? `.MjjYud,.g{margin-bottom:34px!important}`
         : '';
     const hoverRule = t.hover
-      ? `#rso .MjjYud img{transition:transform .18s ease,outline-color .18s ease!important}#rso .MjjYud a:hover img{transform:scale(1.03)!important;outline:2px solid ${t.accent}!important}`
+      ? `#rso .MjjYud a:hover img{outline:2px solid ${t.accent}!important;outline-offset:-2px!important}`
       : '';
-    return `${fontFacesCss(t.font)}
+    return `${allFont(ff)}
 html{color-scheme:${t.dark ? 'dark' : 'light'};font-size:${Math.round(t.fontScale * 100)}%!important}
 html,body,#main,#cnt,#rcnt,.sfbg,.minidiv,#searchform,.L3eUgb{background-color:${t.hasBgImage ? 'transparent' : t.bg}!important;color:${t.text}!important;font-family:${ff}!important}
 body,input,textarea,button,select{font-family:${ff}!important}
@@ -315,11 +379,12 @@ cite,.tjvcx,.qLRx3b{color:${rgba(t.text, 0.75)}!important}
 ${t.hasBgImage ? `.RNNXgb,.MjjYud,.g,.c93Gbe,.FPdoLc input[type=submit],.gNO89b{${blurDecl}}.MjjYud,.g{background:${panel}!important;padding:12px 14px!important;border-radius:${t.radius}px!important}` : `.MjjYud,.g{border-radius:${t.radius}px!important}`}
 ${densityRule}
 ${hoverRule}
-::selection{background:${rgba(t.accent, 0.35)}}`;
+::selection{background:${rgba(t.accent, 0.35)}}
+${t.halo ? `:root:root body :where(h1,h2,h3,h4,a,span,p,yt-formatted-string,.yt-core-attributed-string){text-shadow:0 0 2px ${t.halo},0 1px 3px ${t.halo}}` : ''}`;
   }
 
   const BUILDERS = { youtube, facebook, google };
   const css = (site, theme) => (BUILDERS[site] ? BUILDERS[site](theme) : '');
 
-  root.VeltrixThemes = { THEMES, DEFAULTS, resolve, css, inkOn, fontFacesCss, fontStack };
+  root.VeltrixThemes = { THEMES, DEFAULTS, FONT_FILES, resolve, css, inkOn, fontFacesCss, fontStack };
 })(globalThis);

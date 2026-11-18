@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Veltrix Theme",
-  "version": "1.0.0",
+  "version": "1.4.3",
   "description": "Đổi màu giao diện YouTube, Facebook và Google Tìm kiếm theo bộ theme có sẵn hoặc màu nhấn tùy chọn.",
   "permissions": [
     "storage",
@@ -39,7 +39,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "fonts/*.woff2"
+        "bg.html"
       ],
       "matches": [
         "*://*.youtube.com/*",
@@ -50,5 +50,8 @@
     }
   ],
   "homepage_url": "https://extension.veltrixhost.cloud",
-  "author": "Veltrix Store"
+  "author": "Veltrix Store",
+  "background": {
+    "service_worker": "sw.js"
+  }
 }
