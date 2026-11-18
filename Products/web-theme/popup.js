@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const fontScaleInput = document.getElementById('font-scale');
   const fontScaleVal = document.getElementById('font-scale-val');
   const glassToggle = document.getElementById('glass-toggle');
+  const previewToggle = document.getElementById('preview-toggle');
+  const previewDelay = document.getElementById('preview-delay');
+  const previewEffect = document.getElementById('preview-effect');
   const hoverToggle = document.getElementById('hover-toggle');
   const blurRange = document.getElementById('blur-range');
   const blurVal = document.getElementById('blur-val');
@@ -139,6 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fontScaleVal.textContent = `${Math.round(resolved.fontScale * 100)}%`;
 
     glassToggle.checked = Boolean(resolved.glass);
+    previewToggle.checked = Boolean(state.preview);
+    previewDelay.value = String(state.previewDelay ?? 3);
+    previewEffect.value = state.previewEffect === 'zoom' ? 'zoom' : 'spin';
+    previewDelay.disabled = previewEffect.disabled = !state.preview;
     hoverToggle.checked = Boolean(resolved.hover);
     blurRange.value = String(resolved.blur);
     blurVal.textContent = `${resolved.blur}px`;
@@ -229,6 +236,9 @@ document.addEventListener('DOMContentLoaded', () => {
   densityBtns.forEach((b) => b.addEventListener('click', () => save({ density: b.dataset.density })));
   fontScaleInput.addEventListener('input', (e) => save({ fontScale: parseFloat(e.target.value) }));
   glassToggle.addEventListener('change', (e) => save({ glass: e.target.checked }));
+  previewToggle.addEventListener('change', (e) => save({ preview: e.target.checked }));
+  previewDelay.addEventListener('change', (e) => save({ previewDelay: Number(e.target.value) }));
+  previewEffect.addEventListener('change', (e) => save({ previewEffect: e.target.value }));
   hoverToggle.addEventListener('change', (e) => save({ hover: e.target.checked }));
   blurRange.addEventListener('input', (e) => save({ blur: Number(e.target.value) }));
   opacityRange.addEventListener('input', (e) => save({ panelOpacity: Number(e.target.value) }));

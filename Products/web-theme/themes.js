@@ -80,6 +80,9 @@
     density: '',
     fontScale: null,
     hover: null,
+    preview: false, // xem trước video khi rê chuột (YouTube)
+    previewDelay: 3, // giây
+    previewEffect: 'spin', // 'spin' xoay 3D rồi phóng to | 'zoom' chỉ phóng to
     sites: { youtube: true, facebook: true, google: true }
   };
 

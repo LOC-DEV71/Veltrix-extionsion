@@ -81,6 +81,11 @@
 
   function apply(saved) {
     const s = { ...DEFAULTS, ...saved, sites: { ...DEFAULTS.sites, ...(saved?.sites || {}) } };
+    // Xem trước video: theo công tắc riêng, chạy cả khi tắt theme màu
+    pv.on = Boolean(s.preview) && s.sites.youtube !== false;
+    pv.delay = Math.min(5, Math.max(1, Number(s.previewDelay) || 3));
+    pv.effect = s.previewEffect === 'zoom' ? 'zoom' : 'spin';
+    if (!pv.on) closePreview();
     if (!s.enabled || !s.sites[SITE]) {
       style?.remove();
       setVideo(false);
@@ -194,6 +199,184 @@
   new MutationObserver(scheduleClear).observe(document.documentElement, { childList: true, subtree: true });
   addEventListener('resize', scheduleClear);
   addEventListener('yt-navigate-finish', () => { setTimeout(clearCovers, 300); setTimeout(clearCovers, 1500); });
+
+  // ---- Xem trước video (YouTube): rê chuột lên thumbnail đủ N giây → khung nổi bay từ thumbnail ra giữa màn hình (xoay 3D
+  // hoặc chỉ phóng to) và phát bản nhúng tắt tiếng. Không dùng preview có sẵn của YouTube: nó dính vào thumbnail, rời chuột là
+  // tắt. Rời khung / bấm ra ngoài / Esc → thu về chỗ cũ rồi đóng. Mỗi lúc chỉ 1 khung (trình phát nhúng tốn ~50–100 MB).
+  const pv = { on: false, delay: 3, effect: 'spin' };
+  let pvTimer = 0, pvBox = null, pvClosing = false, pvAudio = null;
+  const videoOf = (a) => {
+    try {
+      const u = new URL(a.href, location.href);
+      if (u.pathname === '/watch') return { id: u.searchParams.get('v'), short: false };
+      const m = u.pathname.match(/^\/shorts\/([\w-]{6,})/);
+      return m ? { id: m[1], short: true } : null;
+    } catch { return null; }
+  };
+  const thumbAt = (el) => {
+    const a = el?.closest?.('a[href*="/watch?v="],a[href^="/shorts/"],a[href*="youtube.com/shorts/"]');
+    return a && a.querySelector('img') && !a.closest('#movie_player') ? a : null;
+  };
+  function closePreview() {
+    if (!pvBox || pvClosing) return;
+    pvClosing = true;
+    const { host, card, from } = pvBox;
+    const anim = card.animate([{ transform: 'none', opacity: 1 }, { transform: from, opacity: 0.2 }], { duration: 320, easing: 'cubic-bezier(.4,0,.2,1)' });
+    host.shadowRoot.querySelector('.dim').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, fill: 'forwards' });
+    anim.onfinish = () => { host.remove(); pvBox = null; pvClosing = false; pvAudio?.ac.close().catch(() => {}); pvAudio = null; };
+  }
+  function openPreview(a) {
+    const v = videoOf(a);
+    if (!v?.id || pvBox) return;
+    const r = a.getBoundingClientRect();
+    if (!r.width) return;
+    const vw = innerWidth, vh = innerHeight;
+    const ratio = v.short ? 9 / 16 : 16 / 9;
+    const w = Math.min(vw * 0.7, vh * 0.72 * ratio), h = w / ratio;
+    const left = (vw - w) / 2, top = (vh - h) / 2;
+    const from = `translate(${r.left - left}px,${r.top - top}px) scale(${r.width / w},${r.height / h})`;
+    const host = document.createElement('veltrix-preview');
+    host.style.cssText = 'all:initial;position:fixed;inset:0;z-index:2147483646;';
+    const root = host.attachShadow({ mode: 'open' });
+    root.innerHTML = `<style>
+      .dim{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
+      .wrap{position:fixed;inset:0;perspective:1600px;pointer-events:none}
+      .card{position:fixed;left:${left}px;top:${top}px;width:${w}px;height:${h}px;border-radius:16px;overflow:hidden;background:#000;
+        box-shadow:0 30px 90px rgba(0,0,0,.6);pointer-events:auto;transform-origin:50% 50%}
+      iframe{width:100%;height:100%;border:0;display:block}
+      .bar{position:absolute;right:10px;top:10px;display:flex;gap:8px}
+      button{all:unset;cursor:pointer;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.65);color:#fff;font:600 13px system-ui,sans-serif}
+      button:hover{background:rgba(0,0,0,.85)}</style>
+      <div class="dim"></div><div class="wrap"><div class="card">
+        <iframe allow="autoplay; encrypted-media; picture-in-picture" src="https://www.youtube.com/embed/${v.id}?autoplay=1&mute=1&playsinline=1&rel=0&enablejsapi=1"></iframe>
+        <div class="bar"><button class="snd" type="button">🔊 Bật tiếng</button><button class="go" type="button">Mở video ↗</button><button class="x" type="button" aria-label="Đóng">✕</button></div>
+      </div></div>`;
+    document.documentElement.appendChild(host);
+    const card = root.querySelector('.card');
+    const dim = root.querySelector('.dim');
+    pvBox = { host, card, from };
+    const frames = pv.effect === 'spin'
+      ? [{ transform: `${from} rotateY(0deg)`, opacity: 0.6 }, { transform: 'scale(.85) rotateY(300deg)', opacity: 1, offset: 0.7 }, { transform: 'none', opacity: 1 }]
+      : [{ transform: from, opacity: 0.6 }, { transform: 'none', opacity: 1 }];
+    // Chỉ tính "rời khung" sau khi khung bay xong VÀ người dùng đã đưa chuột vào: lúc khung bay từ thumbnail ra giữa, con trỏ
+    // đứng yên nên bị tính là rời khung → đóng ngay (lỗi khi thử 2026-11-19).
+    let armed = false, entered = false;
+    card.animate(frames, { duration: pv.effect === 'spin' ? 800 : 380, easing: 'cubic-bezier(.2,.8,.2,1)' }).onfinish = () => { armed = true; };
+    dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+    dim.addEventListener('click', closePreview);
+    root.querySelector('.x').addEventListener('click', closePreview);
+    root.querySelector('.go').addEventListener('click', () => { location.href = a.href; });
+    // Trình phát nhúng có thể bị YouTube từ chối (vd "Mã lỗi 152-4" trên trình duyệt người dùng 2026-11-19, cả bản nocookie).
+    // Khi đó mở CHÍNH TRANG XEM của YouTube (/watch, /shorts) trong khung: cùng nguồn youtube.com nên được nhúng và điều khiển
+    // được DOM; ẩn hết giao diện, chỉ chừa trình phát. Nặng hơn (~150–300 MB khi mở) nên chỉ dùng khi nhúng lỗi; nhớ theo tab.
+    const frame = root.querySelector('iframe');
+    card.style.background = `#000 url("${a.querySelector('img')?.src || `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}") center/cover no-repeat`;
+    let watchTimer = 0;
+    function startWatchMode() {
+      try { sessionStorage.setItem('vxPreviewWatch', '1'); } catch { /* bỏ qua */ }
+      frame.style.opacity = '0'; // hiện thumbnail trong lúc trang trong khung tải
+      frame.removeAttribute('allow');
+      frame.src = v.short ? `/shorts/${v.id}` : `/watch?v=${v.id}`;
+      let n = 0;
+      clearInterval(watchTimer);
+      watchTimer = setInterval(() => {
+        if (!host.isConnected) { clearInterval(watchTimer); return; }
+        const doc = frame.contentDocument;
+        if (!doc?.documentElement) return;
+        if (!doc.getElementById('vx-only-player')) {
+          const st = doc.createElement('style');
+          st.id = 'vx-only-player';
+          st.textContent = `html,body{background:#000!important;overflow:hidden!important}
+            body *{visibility:hidden!important}
+            #movie_player,#movie_player *,#shorts-player,#shorts-player *{visibility:visible!important}
+            #movie_player,#shorts-player{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;z-index:2147483647!important;border-radius:0!important;transform:none!important}
+            #movie_player video,#shorts-player video{width:100vw!important;height:100vh!important;left:0!important;top:0!important;object-fit:contain!important}`;
+          doc.documentElement.appendChild(st);
+        }
+        const vid = doc.querySelector('#movie_player video, #shorts-player video');
+        if (vid) {
+          if (!vid.dataset.vx) {
+            vid.dataset.vx = '1';
+            // Tắt tiếng ở ĐƯỜNG RA (Web Audio, gain 0) thay vì video.muted: YouTube ghi đè muted, và có thể lưu "tắt tiếng" vào
+            // cài đặt âm lượng của người dùng → video mở bình thường sau đó cũng câm. Nút "Bật tiếng" chỉ mở gain.
+            try {
+              const ac = new AudioContext();
+              const gain = ac.createGain(); gain.gain.value = 0;
+              ac.createMediaElementSource(vid).connect(gain).connect(ac.destination);
+              pvAudio = { ac, gain };
+            } catch { pvAudio = null; }
+            frame.contentWindow.dispatchEvent(new Event('resize'));
+          }
+          if (!vid.paused && vid.currentTime > 0) { frame.style.opacity = '1'; }
+          else vid.play?.().catch(() => {});
+        }
+        if (++n > 60 && frame.style.opacity === '0') { clearInterval(watchTimer); showFallback(); } // 15 giây vẫn chưa phát
+      }, 250);
+    }
+    // Nút bật tiếng: chế độ trang xem → bỏ tắt tiếng thẳng trên <video>; chế độ nhúng → lệnh của API nhúng.
+    root.querySelector('.snd').onclick = (e) => {
+      const vid = frame.isConnected && frame.contentDocument?.querySelector?.('#movie_player video, #shorts-player video');
+      if (vid && pvAudio) { pvAudio.ac.resume(); pvAudio.gain.gain.value = 1; }
+      else if (vid) vid.muted = false;
+      else frame.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'unMute', args: [] }), '*');
+      e.currentTarget.remove();
+    };
+    let useWatch = false;
+    try { useWatch = sessionStorage.getItem('vxPreviewWatch') === '1'; } catch { /* bỏ qua */ }
+    if (useWatch) startWatchMode();
+    else {
+      // API nhúng chính thức (enablejsapi=1): gửi "listening" khi khung tải xong, trình phát trả onError khi bị từ chối.
+      const onMsg = (e) => {
+        if (e.source !== frame.contentWindow || typeof e.data !== 'string') return;
+        let d; try { d = JSON.parse(e.data); } catch { return; }
+        if (d?.event !== 'onError') return;
+        removeEventListener('message', onMsg);
+        startWatchMode();
+      };
+      addEventListener('message', onMsg);
+      const ping = () => frame.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), '*');
+      frame.addEventListener('load', ping, { once: true });
+      // Dự phòng: trang lỗi của trình phát nhúng cùng nguồn → đọc được .ytp-error ngay cả khi không có onError
+      let k = 0;
+      const probe = setInterval(() => {
+        if (!host.isConnected || ++k > 32 || frame.src.includes('/watch') || frame.src.includes('/shorts/')) { clearInterval(probe); return; }
+        let bad = false;
+        try { bad = Boolean(frame.contentDocument?.querySelector('.ytp-error')); } catch { /* bỏ qua */ }
+        if (bad) { clearInterval(probe); removeEventListener('message', onMsg); startWatchMode(); }
+      }, 250);
+    }
+    function showFallback() {
+      const img = a.querySelector('img')?.src || `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`;
+      frame.replaceWith(Object.assign(document.createElement('div'), { className: 'fb' }));
+      const fb = root.querySelector('.fb');
+      fb.style.cssText = `width:100%;height:100%;background:#000 url("${img}") center/cover no-repeat;display:grid;place-items:end start`;
+      const note = document.createElement('span');
+      note.textContent = 'Không phát được bản xem trước, bấm "Mở video ↗" để xem';
+      note.style.cssText = 'margin:14px;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.7);color:#fff;font:600 13px system-ui,sans-serif';
+      fb.appendChild(note);
+      root.querySelector('.snd')?.remove();
+    }
+    let leaveT = 0; // lướt qua mép khung chưa đóng ngay
+    card.addEventListener('pointerenter', () => { clearTimeout(leaveT); if (armed) entered = true; });
+    card.addEventListener('pointermove', () => { if (armed) entered = true; });
+    card.addEventListener('pointerleave', () => { if (armed && entered) leaveT = setTimeout(closePreview, 450); });
+  }
+  if (SITE === 'youtube') {
+    let hoverA = null;
+    document.addEventListener('pointerover', (e) => {
+      if (!pv.on || pvBox) return;
+      const a = thumbAt(e.target);
+      if (a === hoverA) return;
+      clearTimeout(pvTimer);
+      hoverA = a;
+      if (a) pvTimer = setTimeout(() => { if (hoverA === a) openPreview(a); }, pv.delay * 1000);
+    }, true);
+    document.addEventListener('pointerout', (e) => {
+      if (hoverA && !hoverA.contains(e.relatedTarget)) { clearTimeout(pvTimer); hoverA = null; }
+    }, true);
+    addEventListener('keydown', (e) => { if (e.key === 'Escape') closePreview(); });
+    addEventListener('yt-navigate-start', closePreview);
+  }
 
   const load = () => chrome.storage.local.get(null).then(apply).catch(() => {});
   load();
