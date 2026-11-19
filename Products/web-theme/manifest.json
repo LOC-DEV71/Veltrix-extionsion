@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Veltrix Theme",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Đổi màu giao diện YouTube, Facebook và Google Tìm kiếm theo bộ theme có sẵn hoặc màu nhấn tùy chọn.",
   "permissions": [
     "storage",

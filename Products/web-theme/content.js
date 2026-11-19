@@ -14,6 +14,7 @@
   // ---- Font: nạp bằng FontFace API (dữ liệu font do sw.js gửi sang). @font-face trỏ tới chrome-extension:// bị CSP của trang
   // (Facebook, YouTube) chặn nên đổi font không ăn (lỗi người dùng báo 2026-11-19); FontFace từ ArrayBuffer không qua CSP.
   const loadedFonts = new Map(); // tên font → Promise
+  const addedFaces = []; // để gỡ khỏi trang khi tắt
   function loadFont(name) {
     const faces = FONT_FILES?.[name];
     if (!faces) return Promise.resolve();
@@ -24,7 +25,8 @@
         if (!res?.b64) return;
         const buf = Uint8Array.from(atob(res.b64), (ch) => ch.charCodeAt(0)).buffer;
         const face = new FontFace(name, buf, { weight: f.weight, unicodeRange: f.range, display: 'swap' });
-        document.fonts.add(await face.load());
+        const loaded = await face.load();
+        document.fonts.add(loaded); addedFaces.push(loaded);
       })).catch(() => {}));
     }
     return loadedFonts.get(name);
@@ -81,8 +83,8 @@
 
   function apply(saved) {
     const s = { ...DEFAULTS, ...saved, sites: { ...DEFAULTS.sites, ...(saved?.sites || {}) } };
-    // Xem trước video: theo công tắc riêng, chạy cả khi tắt theme màu
-    pv.on = Boolean(s.preview) && s.sites.youtube !== false;
+    // Tắt công tắc tổng / tắt trang này = tắt HOÀN TOÀN, gồm cả xem trước video (người dùng 2026-11-19)
+    pv.on = Boolean(s.enabled) && Boolean(s.preview) && s.sites.youtube !== false;
     pv.delay = Math.min(5, Math.max(1, Number(s.previewDelay) || 3));
     pv.effect = s.previewEffect === 'zoom' ? 'zoom' : 'spin';
     if (!pv.on) closePreview();
@@ -92,6 +94,9 @@
       smartOn = false; resetSmart();
       clearOn = false; resetClear();
       if (original && wantDark !== null) restoreMode();
+      // gỡ font đã nạp vào trang
+      addedFaces.splice(0).forEach((f) => document.fonts.delete(f));
+      loadedFonts.clear();
       return;
     }
     const theme = resolve(s);

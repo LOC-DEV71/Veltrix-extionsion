@@ -20,7 +20,7 @@
   if (window.__VELTRIX_AMBIENT_INITIALIZED__) return;
   window.__VELTRIX_AMBIENT_INITIALIZED__ = true;
 
-  document.documentElement.setAttribute('data-veltrix-yt', 'true');
+  // data-veltrix-yt="true" (bật mọi CSS của extension) chỉ đặt khi đang bật: xem applySettingsToDOM.
 
   console.log(
     '%c[Veltrix]%c Full-Screen Video Frame Duplication Engine v4.0 active',
@@ -89,8 +89,13 @@
   }
 
   function applyVideoQualityChoice(qualityId) {
+    // Chất lượng là chức năng RIÊNG: chạy theo lựa chọn "Chất lượng", không phụ thuộc nút Veltrix Gamming (người dùng
+    // 2026-11-19). Không muốn ép thì chọn Auto.
+    const root = document.documentElement;
     const matched = QUALITY_OPTIONS.find((q) => q.id === qualityId) || QUALITY_OPTIONS[0];
-    document.documentElement.setAttribute('data-veltrix-quality', matched.id);
+    root.setAttribute('data-veltrix-quality', matched.id);
+    // Dữ liệu kèm sự kiện không đi qua được sang page_bridge.js (world MAIN): gửi kèm qua thuộc tính DOM.
+    root.dataset.veltrixQualityCode = matched.ytCode;
     ensureSvgEnhancerFilters();
     window.dispatchEvent(
       new CustomEvent('veltrix:set-quality', {
@@ -262,13 +267,32 @@
     updateQuickToggleUI();
   }
 
+  // Tắt (Veltrix Gamming OFF) = gỡ mọi can thiệp của nền Ambient: cờ bật CSS, khung canvas, biến CSS, trả lại cinematics
+  // gốc. Chất lượng / làm nét là chức năng riêng, giữ nguyên. Chỉ giữ nút logo để bật lại (người dùng 2026-11-19).
+  const VARS = ['--veltrix-blur', '--veltrix-brightness', '--veltrix-saturate', '--veltrix-spread', '--veltrix-opacity', '--veltrix-origin'];
   function applySettingsToDOM() {
     const root = document.documentElement;
+    if (!currentSettings.enabled) {
+      root.removeAttribute('data-veltrix-yt');
+      VARS.forEach((v) => root.style.removeProperty(v));
+      document.getElementById('veltrix-cinematics')?.remove();
+      ['cinematics', 'cinematics-container'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el && el.style.display === 'none') el.style.removeProperty('display');
+      });
+      document.querySelectorAll('ytd-cinematics').forEach((el) => { if (el.style.display === 'none') el.style.removeProperty('display'); });
+      applyVideoQualityChoice(currentSettings.videoQuality || '8K'); // chất lượng không tắt theo Gamming
+      updateQuickToggleUI();
+      renderers.forEach((renderer) => renderer.updateSettings(currentSettings));
+      return;
+    }
+    root.setAttribute('data-veltrix-yt', 'true');
     root.style.setProperty('--veltrix-blur', `${currentSettings.blur}px`);
     root.style.setProperty('--veltrix-brightness', `${currentSettings.brightness}%`);
     root.style.setProperty('--veltrix-saturate', `${currentSettings.saturation}%`);
     root.style.setProperty('--veltrix-spread', `${currentSettings.spread}`);
-    root.style.setProperty('--veltrix-opacity', currentSettings.enabled ? '0.88' : '0');
+    root.style.setProperty('--veltrix-opacity', '0.88');
+    renderers.forEach((renderer) => renderer.attach()); // bật lại: gắn lại khung canvas đã gỡ
 
     applyVideoQualityChoice(currentSettings.videoQuality || '8K');
 
@@ -365,6 +389,7 @@
     }
 
     attachYouTube() {
+      if (!currentSettings.enabled) return; // đang tắt: không gắn khung, không ẩn cinematics của YouTube
       const contentRoot =
         document.querySelector('#content.ytd-app') ||
         document.querySelector('ytd-watch-flexy') ||

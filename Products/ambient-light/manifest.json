@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Veltrix - Universal Ambient Light",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Hiệu ứng Ambient Light (đèn nền phản chiếu) sống động, cực mượt cho mọi video trên web - Thương hiệu Veltrix.",
   "permissions": [
     "storage",

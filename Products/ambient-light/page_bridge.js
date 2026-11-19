@@ -86,7 +86,9 @@
   }
 
   window.addEventListener('veltrix:set-quality', (e) => {
-    const code = e?.detail?.quality || 'auto';
+    // content.js gửi kèm mã qua thuộc tính DOM (dữ liệu kèm sự kiện không qua được giữa 2 world)
+    const code = e?.detail?.quality || document.documentElement.dataset.veltrixQualityCode || 'auto';
+    if (code === 'off') { desiredQuality = null; return; } // extension tắt: ngừng ép chất lượng
     desiredQuality = code;
     if (code === 'auto') {
       const player = document.getElementById('movie_player');
